@@ -10,6 +10,7 @@ import (
 	"am-shortlink-portal/api/internal/audit"
 	"am-shortlink-portal/api/internal/auth"
 	"am-shortlink-portal/api/internal/domain"
+	"am-shortlink-portal/api/internal/export"
 	"am-shortlink-portal/api/internal/httpapi/gen"
 	"am-shortlink-portal/api/internal/httpapi/middleware"
 	"am-shortlink-portal/api/internal/mask"
@@ -25,6 +26,7 @@ type Handler struct {
 	Masker  *mask.Masker
 	Reports *report.Service
 	Saved   *savedreport.Service
+	Exports *export.Service
 	Audit   *audit.Logger
 }
 

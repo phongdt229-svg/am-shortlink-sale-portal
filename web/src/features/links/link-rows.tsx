@@ -10,7 +10,6 @@ import { STATUS_LABEL } from "./status";
 
 type Row = components["schemas"]["LinkRow"];
 
-
 /** Bảng link (top / tăng trưởng / link chết / chưa định danh / link của CTV). */
 export function LinkRows({ rows, mode = "clicks", showOwner = true }: { rows: Row[]; mode?: "clicks" | "growth" | "dead"; showOwner?: boolean }) {
   const search = useFilterSearch();

@@ -34,12 +34,7 @@ export async function sealSession(s: Session, secret: string): Promise<string> {
 }
 
 /** Giải mã cookie; sai / bị sửa / hết hạn nhàn rỗi / refresh hết hạn → null. */
-export async function openSession(
-  token: string | undefined,
-  secret: string,
-  idleHours: number,
-  now = nowSec(),
-): Promise<Session | null> {
+export async function openSession(token: string | undefined, secret: string, idleHours: number, now = nowSec()): Promise<Session | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtDecrypt(token, await keyFor(secret));

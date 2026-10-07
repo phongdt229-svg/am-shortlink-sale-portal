@@ -14,8 +14,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"am-shortlink-portal/api/internal/audit"
 	"am-shortlink-portal/api/internal/cache"
-
 	"am-shortlink-portal/api/internal/domain"
 	"am-shortlink-portal/api/internal/mask"
 	"am-shortlink-portal/api/internal/scope"
@@ -38,6 +38,14 @@ type Service struct {
 	piiMu     sync.Mutex
 	piiKeys   map[string]string // tham số PII → hash | drop (đọc param_registry, làm mới 5 phút)
 	piiLoaded time.Time
+
+	audit *audit.Logger
+}
+
+// WithAudit: ghi nhật ký thao tác quản trị (param_registry).
+func (s *Service) WithAudit(a *audit.Logger) *Service {
+	s.audit = a
+	return s
 }
 
 // WithShortURLBase: domain dựng short URL <base>/<prefix>/<code>.

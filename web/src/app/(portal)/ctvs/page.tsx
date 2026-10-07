@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/report/page-header";
 import { Button } from "@/components/ui/button";
 import { CTVsTable } from "@/features/ctvs/ctvs-table";
+import { ExportButton } from "@/features/exports/export-button";
 import { data, serverApi } from "@/lib/api/server";
 import { pageContext, type SearchParams } from "@/lib/filters/page";
 import { getSession } from "@/lib/session/server";
@@ -25,6 +26,7 @@ export default async function CTVsPage({ searchParams }: { searchParams: SearchP
         subtitle="Xếp theo lượt click trong kỳ — dùng cho đối soát / trả thưởng"
         actions={
           <>
+            <ExportButton kind="ctvs" label="Xuất đối soát" />
             <Button variant="outline" size="sm" asChild>
               <Link href="/ctvs/lookup">
                 <Search /> Tra cứu CTV

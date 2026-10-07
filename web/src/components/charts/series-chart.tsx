@@ -41,7 +41,10 @@ export function SeriesChart({ series, initial = "clicks" }: { series: Series; in
             type="button"
             onClick={() => setKey(o.key)}
             aria-pressed={key === o.key}
-            className={cn("rounded-md px-2 py-1 text-xs", key === o.key ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-muted")}
+            className={cn(
+              "rounded-md px-2 py-1 text-xs",
+              key === o.key ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-muted",
+            )}
           >
             {o.label}
           </button>
@@ -87,7 +90,15 @@ export function SeriesChart({ series, initial = "clicks" }: { series: Series; in
             {prev && (
               <Line name="Kỳ trước" dataKey="prev" stroke="var(--chart-muted)" strokeDasharray="5 4" strokeWidth={2} dot={false} isAnimationActive={false} />
             )}
-            <Line name={label} dataKey="cur" stroke="var(--chart-1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--card)" }} isAnimationActive={false} />
+            <Line
+              name={label}
+              dataKey="cur"
+              stroke="var(--chart-1)"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--card)" }}
+              isAnimationActive={false}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

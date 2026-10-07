@@ -43,9 +43,7 @@ const SECTIONS: { key: NavItem["section"]; label: string }[] = [
 
 /** Mục đang chọn = mục có href dài nhất khớp đường dẫn (vd /clicks/explore không làm sáng /clicks). */
 function activeHref(items: NavItem[], pathname: string): string | undefined {
-  return items
-    .filter((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
-    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+  return items.filter((i) => pathname === i.href || pathname.startsWith(i.href + "/")).sort((a, b) => b.href.length - a.href.length)[0]?.href;
 }
 
 const FILTER_KEYS = ["preset", "from", "to", "account", "campaign", "ctv", "prefix", "compare", "granularity"];

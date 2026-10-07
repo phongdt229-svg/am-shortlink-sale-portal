@@ -7,9 +7,7 @@ export const REFRESH_SKEW = 60;
 /** Ghi lại cookie để gia hạn phiên nếu lần hoạt động trước đã cũ hơn (giây). */
 export const SEEN_UPDATE = 300;
 
-export type FreshResult =
-  | { kind: "ok"; session: Session; changed: boolean }
-  | { kind: "expired" };
+export type FreshResult = { kind: "ok"; session: Session; changed: boolean } | { kind: "expired" };
 
 export async function ensureFresh(apiUrl: string, s: Session, now = nowSec()): Promise<FreshResult> {
   if (s.atExp - now > REFRESH_SKEW) {

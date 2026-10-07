@@ -4,6 +4,6 @@ $ next start -p 3000
    - Network:      http://172.18.16.207:3000
 
  ✓ Starting...
- ✓ Ready in 618ms
-{"level":"info","time":"2026-10-07T08:11:15.356Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
-{"level":"info","time":"2026-10-07T08:12:18.451Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+ ✓ Ready in 1455ms
+{"level":"info","time":"2026-10-07T09:01:25.965Z","service":"am-shortlink-portal-web","env":"local","user":"admin","role":"admin","msg":"login"}
+{"level":"info","time":"2026-10-07T09:02:52.199Z","service":"am-shortlink-portal-web","env":"local","user":"admin","role":"admin","msg":"login"}

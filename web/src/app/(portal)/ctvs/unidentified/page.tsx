@@ -29,7 +29,10 @@ export default async function UnidentifiedPage({ searchParams }: { searchParams:
         subtitle={`Link không có utm_extra_ctv · chiếm ${fmtPercent(r.share_of_clicks)} lượt click trong kỳ`}
         crumbs={[{ href: `/ctvs${search}`, label: "CTV" }]}
       />
-      <KpiCards kpis={{ period: { from: query.from, to: query.to }, current: r.metrics }} keys={["total_links", "new_links", "active_links", "clicks", "unique_clicks", "suspicious_clicks"]} />
+      <KpiCards
+        kpis={{ period: { from: query.from, to: query.to }, current: r.metrics }}
+        keys={["total_links", "new_links", "active_links", "clicks", "unique_clicks", "suspicious_clicks"]}
+      />
       <Card>
         <CardHeader>
           <CardTitle>Link cần bổ sung CTV</CardTitle>

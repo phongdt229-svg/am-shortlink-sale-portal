@@ -7,15 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/primitives";
 import { browserApi } from "@/lib/api/browser";
 import { unwrap } from "@/lib/api/problem";
-import {
-  filterParsers,
-  GRANULARITIES,
-  GRANULARITY_LABELS,
-  PRESET_LABELS,
-  PRESETS,
-  resolveRange,
-  type Preset,
-} from "@/lib/filters";
+import { filterParsers, GRANULARITIES, GRANULARITY_LABELS, PRESET_LABELS, PRESETS, resolveRange, type Preset } from "@/lib/filters";
 import { fmtDate, todayVN } from "@/lib/format";
 import type { Role } from "@/lib/session/session";
 import { cn } from "@/lib/utils";
@@ -104,7 +96,11 @@ export function FilterBar({ role }: { role: Role }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const list = ctvText.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean).slice(0, 100);
+            const list = ctvText
+              .split(/[\s,;]+/)
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .slice(0, 100);
             void setF({ ctv: list.length ? list : null });
           }}
         >
@@ -117,12 +113,7 @@ export function FilterBar({ role }: { role: Role }) {
             onBlur={(e) => e.currentTarget.form?.requestSubmit()}
           />
         </form>
-        <Select
-          aria-label="Prefix"
-          className="h-8"
-          value={f.prefix[0] ?? ""}
-          onChange={(e) => void setF({ prefix: e.target.value ? [e.target.value] : null })}
-        >
+        <Select aria-label="Prefix" className="h-8" value={f.prefix[0] ?? ""} onChange={(e) => void setF({ prefix: e.target.value ? [e.target.value] : null })}>
           <option value="">Prefix: tất cả</option>
           {(prefixes.data?.items ?? []).map((p) => (
             <option key={p.id} value={p.id}>

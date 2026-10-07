@@ -51,9 +51,7 @@ describe("toApiQuery / filtersToSearch", () => {
   });
 
   it("giữ bộ lọc khi drill-down", () => {
-    expect(filtersToSearch({ ...base, account: ["a", "b"], compare: true }, { tab: "clicks" })).toBe(
-      "?account=a%2Cb&compare=true&tab=clicks",
-    );
+    expect(filtersToSearch({ ...base, account: ["a", "b"], compare: true }, { tab: "clicks" })).toBe("?account=a%2Cb&compare=true&tab=clicks");
     expect(filtersToSearch(base)).toBe("");
   });
 });

@@ -49,7 +49,7 @@ export function ExplorerChart({ rows, dims, kind }: { rows: ExplorerRow[]; dims:
                 <Cell key={d.name} fill={d.name === "Khác" ? OTHER : COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(v: number) => `${fmtNumber(v)} (${fmtPercent(v / total)})`} />
+            <Tooltip formatter={(v) => `${fmtNumber(Number(v))} (${fmtPercent(Number(v) / total)})`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -65,7 +65,12 @@ export function ExplorerChart({ rows, dims, kind }: { rows: ExplorerRow[]; dims:
     const totals = new Map<string, number>();
     if (dims.length > 1) {
       for (const r of rows) totals.set(r.keys[1]!.label, (totals.get(r.keys[1]!.label) ?? 0) + r.metrics.clicks);
-      series.push(...[...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k]) => k));
+      series.push(
+        ...[...totals.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([k]) => k),
+      );
     }
     const data = xs.map((x) => {
       const row: Record<string, string | number> = { x };
@@ -82,7 +87,7 @@ export function ExplorerChart({ rows, dims, kind }: { rows: ExplorerRow[]; dims:
         <CartesianGrid stroke="var(--border)" vertical={false} />
         <XAxis dataKey="x" tickFormatter={fmtX} tick={tick} axisLine={false} tickLine={false} minTickGap={20} />
         <YAxis tickFormatter={fmtCompact} tick={tick} axisLine={false} tickLine={false} width={48} />
-        <Tooltip labelFormatter={(v) => (TIME_DIMS.has(xDim) ? fmtDate(String(v)) : String(v))} formatter={(v: number) => fmtNumber(v)} />
+        <Tooltip labelFormatter={(v) => (TIME_DIMS.has(xDim) ? fmtDate(String(v)) : String(v))} formatter={(v) => fmtNumber(Number(v))} />
         {keys.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
       </>
     );
@@ -100,7 +105,15 @@ export function ExplorerChart({ rows, dims, kind }: { rows: ExplorerRow[]; dims:
             <BarChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               {common}
               {keys.map((k, i) => (
-                <Bar key={k} dataKey={k} stackId="a" fill={k === "Khác" ? OTHER : COLORS[i % COLORS.length]} stroke="var(--card)" strokeWidth={1} isAnimationActive={false} />
+                <Bar
+                  key={k}
+                  dataKey={k}
+                  stackId="a"
+                  fill={k === "Khác" ? OTHER : COLORS[i % COLORS.length]}
+                  stroke="var(--card)"
+                  strokeWidth={1}
+                  isAnimationActive={false}
+                />
               ))}
             </BarChart>
           )}
@@ -118,8 +131,15 @@ export function ExplorerChart({ rows, dims, kind }: { rows: ExplorerRow[]; dims:
           <CartesianGrid stroke="var(--border)" horizontal={false} />
           <XAxis type="number" tickFormatter={fmtCompact} tick={tick} axisLine={false} tickLine={false} />
           <YAxis type="category" dataKey="name" width={180} tick={tick} axisLine={false} tickLine={false} />
-          <Tooltip formatter={(v: number) => fmtNumber(v)} cursor={{ fill: "var(--muted)" }} />
-          <Bar dataKey="clicks" name="Lượt click" fill="var(--chart-1)" radius={[0, 4, 4, 0]} isAnimationActive={false} label={{ position: "right", fontSize: 11, fill: "var(--muted-foreground)", formatter: (v: number) => fmtCompact(v) }} />
+          <Tooltip formatter={(v) => fmtNumber(Number(v))} cursor={{ fill: "var(--muted)" }} />
+          <Bar
+            dataKey="clicks"
+            name="Lượt click"
+            fill="var(--chart-1)"
+            radius={[0, 4, 4, 0]}
+            isAnimationActive={false}
+            label={{ position: "right", fontSize: 11, fill: "var(--muted-foreground)", formatter: (v: unknown) => fmtCompact(Number(v)) }}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -40,7 +40,14 @@ export function AccountsTable({ page, compare }: { page: Page; compare: boolean 
     num("suspicious_clicks", "Nghi vấn"),
     num("ctr_per_link", "Click/link"),
     ...(compare
-      ? [{ id: "change", header: "So kỳ trước", cell: ({ row }) => <DeltaCell value={row.original.change_clicks} />, meta: { align: "right", sortKey: "change_clicks" } } satisfies ColumnDef<Row, unknown>]
+      ? [
+          {
+            id: "change",
+            header: "So kỳ trước",
+            cell: ({ row }) => <DeltaCell value={row.original.change_clicks} />,
+            meta: { align: "right", sortKey: "change_clicks" },
+          } satisfies ColumnDef<Row, unknown>,
+        ]
       : []),
   ];
   const t = page.totals;

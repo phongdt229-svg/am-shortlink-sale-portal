@@ -5,11 +5,29 @@ import { Badge } from "@/components/ui/primitives";
 import { decodeClickFilters, encodeClickFilters, type ClickFilters } from "@/lib/filters/click-filters";
 
 const LABELS: Record<string, string> = {
-  links: "Link", access_prefix: "Prefix truy cập", api_version: "API", dest_host: "Domain đích", device: "Thiết bị",
-  os: "HĐH", browser: "Trình duyệt", source_group: "Nguồn", referer_host: "Referer", country: "Quốc gia",
-  province: "Tỉnh/thành", ip: "IP", weekdays: "Thứ", hour_from: "Từ giờ", hour_to: "Đến giờ", quality: "Chất lượng",
-  visit: "Lượt", is_custom: "Link custom", campaign_presence: "Chiến dịch", ctv_presence: "CTV", params: "Tham số",
-  link_created_from: "Link tạo từ", link_created_to: "Link tạo đến",
+  links: "Link",
+  access_prefix: "Prefix truy cập",
+  api_version: "API",
+  dest_host: "Domain đích",
+  device: "Thiết bị",
+  os: "HĐH",
+  browser: "Trình duyệt",
+  source_group: "Nguồn",
+  referer_host: "Referer",
+  country: "Quốc gia",
+  province: "Tỉnh/thành",
+  ip: "IP",
+  weekdays: "Thứ",
+  hour_from: "Từ giờ",
+  hour_to: "Đến giờ",
+  quality: "Chất lượng",
+  visit: "Lượt",
+  is_custom: "Link custom",
+  campaign_presence: "Chiến dịch",
+  ctv_presence: "CTV",
+  params: "Tham số",
+  link_created_from: "Link tạo từ",
+  link_created_to: "Link tạo đến",
 };
 
 function describe(v: unknown): string {

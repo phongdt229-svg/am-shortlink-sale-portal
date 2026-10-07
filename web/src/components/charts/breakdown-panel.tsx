@@ -44,7 +44,11 @@ export function BreakdownPanel({ data, dims = ORDER }: { data: Breakdowns; dims?
       ) : (
         <ul className="space-y-1.5" role="tabpanel">
           {top.map((t) => (
-            <li key={t.key} className="group grid grid-cols-[minmax(6rem,9rem)_1fr_auto] items-center gap-2 text-sm" title={`${label(t.key)}: ${fmtNumber(t.clicks)} click (${fmtPercent(t.share)})`}>
+            <li
+              key={t.key}
+              className="group grid grid-cols-[minmax(6rem,9rem)_1fr_auto] items-center gap-2 text-sm"
+              title={`${label(t.key)}: ${fmtNumber(t.clicks)} click (${fmtPercent(t.share)})`}
+            >
               <span className="truncate">{label(t.key)}</span>
               <span className="h-3 rounded-r bg-muted">
                 <span className="block h-3 rounded-r bg-[var(--chart-1)] group-hover:opacity-80" style={{ width: `${(t.clicks / max) * 100}%` }} />

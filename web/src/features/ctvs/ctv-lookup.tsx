@@ -29,7 +29,14 @@ export function CTVLookup() {
           void setQ(text.trim() || null);
         }}
       >
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="0901 234 567 / +84901234567 / hash" aria-label="SĐT hoặc hash CTV" autoFocus inputMode="search" />
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="0901 234 567 / +84901234567 / hash"
+          aria-label="SĐT hoặc hash CTV"
+          autoFocus
+          inputMode="search"
+        />
         <Button type="submit" disabled={text.trim().length < 3}>
           <Search /> Tra cứu
         </Button>
@@ -73,7 +80,9 @@ export function CTVLookup() {
                           <Link href={`/links/${encodeURIComponent(l.code)}`} className="font-medium text-primary hover:underline">
                             /{l.prefix}/{l.code}
                           </Link>{" "}
-                          <span className="text-xs text-muted-foreground">{l.campaign_code || "—"} · {l.long_url}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {l.campaign_code || "—"} · {l.long_url}
+                          </span>
                         </li>
                       ))}
                     </ul>

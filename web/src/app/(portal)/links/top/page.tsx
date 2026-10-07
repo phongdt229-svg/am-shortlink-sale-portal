@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createSearchParamsCache, parseAsInteger, parseAsStringLiteral } from "nuqs/server";
 import { PageHeader } from "@/components/report/page-header";
 import { Card, CardContent } from "@/components/ui/primitives";
+import { ExportButton } from "@/features/exports/export-button";
 import { LinkRows } from "@/features/links/link-rows";
 import { ModeTabs } from "@/features/links/mode-tabs";
 import { Pager } from "@/features/links/pager";
@@ -24,13 +25,24 @@ export default async function TopLinksPage({ searchParams }: { searchParams: Sea
   const r = data(
     await api.GET("/v1/reports/links/top", {
       params: {
-        query: { from: query.from, to: query.to, account: query.account, campaign: query.campaign, ctv: query.ctv, prefix: query.prefix, mode, dead_days, page, page_size: 50 },
+        query: {
+          from: query.from,
+          to: query.to,
+          account: query.account,
+          campaign: query.campaign,
+          ctv: query.ctv,
+          prefix: query.prefix,
+          mode,
+          dead_days,
+          page,
+          page_size: 50,
+        },
       },
     }),
   );
   return (
     <div className="space-y-4">
-      <PageHeader title="Báo cáo theo link" />
+      <PageHeader title="Báo cáo theo link" actions={<ExportButton kind="links_top" extra={{ mode, dead_days }} />} />
       <ModeTabs mode={mode} deadDays={dead_days} />
       <Card>
         <CardContent className="space-y-3">

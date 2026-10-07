@@ -15,6 +15,7 @@ import { filterParsers, toApiQuery, type Filters } from "@/lib/filters";
 import { fmtDate, fmtDecimal, fmtNumber, fmtPercent } from "@/lib/format";
 import type { Role } from "@/lib/session/session";
 import { cn } from "@/lib/utils";
+import { ExportButton } from "@/features/exports/export-button";
 import { DIM_GROUPS, dimLabel, TIME_DIMS } from "./dims";
 import { ExplorerChart, resolveChart } from "./explorer-chart";
 import { FilterPanel } from "./filter-panel";
@@ -42,7 +43,19 @@ const CHARTS: { key: ChartKind; label: string }[] = [
   { key: "pie", label: "Tròn (tỉ trọng)" },
 ];
 
-function DimSelect({ value, onChange, params, optional, label }: { value?: string; onChange: (v?: string) => void; params: { key: string; label: string }[]; optional?: boolean; label: string }) {
+function DimSelect({
+  value,
+  onChange,
+  params,
+  optional,
+  label,
+}: {
+  value?: string;
+  onChange: (v?: string) => void;
+  params: { key: string; label: string }[];
+  optional?: boolean;
+  label: string;
+}) {
   return (
     <Select aria-label={label} className="h-8 max-w-44" value={value ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
       {optional && <option value="">— không —</option>}
@@ -120,21 +133,23 @@ export function Explorer({ role, lock, compact }: { role: Role; lock?: Lock; com
         <CardContent className="space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted-foreground">Nhóm theo</span>
-            {[0, 1, 2].map((i) => (
-              <DimSelect
-                key={i}
-                label={`Chiều ${i + 1}`}
-                optional={i > 0}
-                params={paramDims}
-                value={st.g[i]}
-                onChange={(v) => {
-                  const next = [...st.g];
-                  if (v) next[i] = v;
-                  else next.splice(i);
-                  setSt({ g: [...new Set(next.filter(Boolean))] });
-                }}
-              />
-            )).slice(0, Math.min(3, st.g.length + 1))}
+            {[0, 1, 2]
+              .map((i) => (
+                <DimSelect
+                  key={i}
+                  label={`Chiều ${i + 1}`}
+                  optional={i > 0}
+                  params={paramDims}
+                  value={st.g[i]}
+                  onChange={(v) => {
+                    const next = [...st.g];
+                    if (v) next[i] = v;
+                    else next.splice(i);
+                    setSt({ g: [...new Set(next.filter(Boolean))] });
+                  }}
+                />
+              ))
+              .slice(0, Math.min(3, st.g.length + 1))}
             <span className="ml-2 text-muted-foreground">Sắp xếp</span>
             <Select className="h-8" aria-label="Sắp xếp theo" value={st.s ?? "clicks"} onChange={(e) => setSt({ s: e.target.value as SortBy })}>
               {SORTS.map((s) => (
@@ -166,6 +181,7 @@ export function Explorer({ role, lock, compact }: { role: Role; lock?: Lock; com
               </Button>
             )}
             {!compact && <SavedMenu state={st} globals={base} />}
+            {!compact && <ExportButton kind="explorer" />}
           </div>
           {showFilters && (
             <div className="border-t pt-3">
@@ -188,7 +204,9 @@ export function Explorer({ role, lock, compact }: { role: Role; lock?: Lock; com
       {data && (
         <>
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <Badge tone={data.source === "stats" ? "success" : "primary"}>{data.source === "stats" ? "Số liệu tổng hợp (≤ 12 tháng)" : "Click thô (≤ 3 tháng)"}</Badge>
+            <Badge tone={data.source === "stats" ? "success" : "primary"}>
+              {data.source === "stats" ? "Số liệu tổng hợp (≤ 12 tháng)" : "Click thô (≤ 3 tháng)"}
+            </Badge>
             <span>
               {fmtDate(data.period.from)} – {fmtDate(data.period.to)} · {fmtNumber(data.group_count ?? data.rows.length)} nhóm
             </span>
@@ -281,10 +299,14 @@ function ResultTable({ data, query }: { data: Result; query: ReturnType<typeof b
                   <td className="px-2 py-1.5 text-right tabular-nums text-muted-foreground">{fmtPercent(r.share)}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.unique_clicks)}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.bot_clicks)}</td>
-                  <td className={cn("px-2 py-1.5 text-right tabular-nums", r.metrics.suspicious_clicks > 0 && !isOther && "text-destructive")}>{fmtNumber(r.metrics.suspicious_clicks)}</td>
+                  <td className={cn("px-2 py-1.5 text-right tabular-nums", r.metrics.suspicious_clicks > 0 && !isOther && "text-destructive")}>
+                    {fmtNumber(r.metrics.suspicious_clicks)}
+                  </td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.active_links)}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums">{fmtDecimal(r.metrics.clicks_per_link)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-muted-foreground">{r.metrics.last_click_at ? fmtDate(r.metrics.last_click_at) : "–"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-muted-foreground">
+                    {r.metrics.last_click_at ? fmtDate(r.metrics.last_click_at) : "–"}
+                  </td>
                   {compare && (
                     <td className="px-2 py-1.5 text-right">
                       <DeltaCell value={r.change_clicks} />

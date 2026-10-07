@@ -3,7 +3,8 @@ import Link from "next/link";
 import { PageHeader } from "@/components/report/page-header";
 import { SummaryView } from "@/components/report/summary-view";
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
-import { ClickLog } from "@/features/clicks/click-log";
+import { ClickTab } from "@/features/explorer/click-tab";
+import { getSession } from "@/lib/session/server";
 import { ClickTable } from "@/features/clicks/click-table";
 import { DetailTabs } from "@/features/explorer/detail-tabs";
 import { CopyButton } from "@/features/links/copy-button";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LinkDetailPage({ params, searchParams }: Props) {
   const code = decodeURIComponent((await params).code);
   const { api: query, search } = await pageContext(searchParams);
-  const api = await serverApi();
+  const [api, session] = await Promise.all([serverApi(), getSession()]);
   const r = data(
     await api.GET("/v1/reports/links/{code}", {
       params: { path: { code }, query: { from: query.from, to: query.to, compare: query.compare, granularity: query.granularity } },
@@ -31,7 +32,11 @@ export default async function LinkDetailPage({ params, searchParams }: Props) {
   const st = STATUS_LABEL[l.status] ?? STATUS_LABEL.active!;
   return (
     <div className="space-y-4">
-      <PageHeader title={`Link /${l.prefix}/${l.code}`} crumbs={[{ href: `/links/top${search}`, label: "Link" }]} actions={<Badge tone={st.tone}>{st.label}</Badge>} />
+      <PageHeader
+        title={`Link /${l.prefix}/${l.code}`}
+        crumbs={[{ href: `/links/top${search}`, label: "Link" }]}
+        actions={<Badge tone={st.tone}>{st.label}</Badge>}
+      />
       <Card>
         <CardContent className="grid gap-4 md:grid-cols-[1fr_auto]">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-[9rem_1fr]">
@@ -74,10 +79,16 @@ export default async function LinkDetailPage({ params, searchParams }: Props) {
             </dd>
           </dl>
           {/* eslint-disable-next-line @next/next/no-img-element -- ảnh QR động qua BFF (cookie phiên) */}
-          <img src={`/api/bff/v1/links/${encodeURIComponent(l.code)}/qrcode?size=256`} alt={`Mã QR ${l.short_url}`} width={160} height={160} className="rounded-md border bg-white p-1" />
+          <img
+            src={`/api/bff/v1/links/${encodeURIComponent(l.code)}/qrcode?size=256`}
+            alt={`Mã QR ${l.short_url}`}
+            width={160}
+            height={160}
+            className="rounded-md border bg-white p-1"
+          />
         </CardContent>
       </Card>
-      <DetailTabs clicks={<ClickLog locked={{ filters: { links: { values: [l.code] } }, base: { account: [l.owner] } }} />}>
+      <DetailTabs clicks={<ClickTab role={session!.user.role} lock={{ links: [l.code], account: [l.owner] }} />}>
         <SummaryView summary={r.summary}>
           <Card>
             <CardHeader>

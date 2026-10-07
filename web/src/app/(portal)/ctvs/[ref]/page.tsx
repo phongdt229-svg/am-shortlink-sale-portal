@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/report/page-header";
 import { SummaryView } from "@/components/report/summary-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { CampaignList } from "@/features/campaigns/campaigns-table";
-import { ClickLog } from "@/features/clicks/click-log";
+import { ClickTab } from "@/features/explorer/click-tab";
+import { getSession } from "@/lib/session/server";
 import { DetailTabs } from "@/features/explorer/detail-tabs";
 import { LinkRows } from "@/features/links/link-rows";
 import { data, serverApi } from "@/lib/api/server";
@@ -24,7 +25,7 @@ const ALERT = {
 export default async function CTVDetailPage({ params, searchParams }: Props) {
   const ref = decodeURIComponent((await params).ref);
   const { api: query, search } = await pageContext(searchParams);
-  const api = await serverApi();
+  const [api, session] = await Promise.all([serverApi(), getSession()]);
   const r = data(await api.GET("/v1/reports/ctvs/{ref}", { params: { path: { ref }, query: { ...query, ctv: undefined } } }));
   return (
     <div className="space-y-4">
@@ -46,7 +47,7 @@ export default async function CTVDetailPage({ params, searchParams }: Props) {
           })}
         </div>
       )}
-      <DetailTabs clicks={<ClickLog locked={{ base: { ctv: ref } }} />} explorerLock={{ ctv: [ref] }}>
+      <DetailTabs clicks={<ClickTab role={session!.user.role} lock={{ ctv: [ref] }} />}>
         <SummaryView summary={r.summary}>
           <div className="grid gap-4 xl:grid-cols-3">
             <Card>

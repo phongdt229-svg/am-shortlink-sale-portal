@@ -20,14 +20,30 @@ function useFacets(field: string, q: string, accounts: string[], enabled = true)
   return useQuery({
     queryKey: ["facets", field, q, accounts],
     queryFn: async () =>
-      unwrap(await browserApi.GET("/v1/reports/clicks/facets", { params: { query: { field, q: q || undefined, account: accounts.length ? accounts : undefined, limit: 100 } } })),
+      unwrap(
+        await browserApi.GET("/v1/reports/clicks/facets", {
+          params: { query: { field, q: q || undefined, account: accounts.length ? accounts : undefined, limit: 100 } },
+        }),
+      ),
     enabled,
     staleTime: 5 * 60_000,
   });
 }
 
 /** Một tiêu chí chọn nhiều + nút loại trừ (NOT). */
-function FacetCriterion({ label, field, value, onChange, accounts }: { label: string; field: string; value?: Criterion; onChange: (c?: Criterion) => void; accounts: string[] }) {
+function FacetCriterion({
+  label,
+  field,
+  value,
+  onChange,
+  accounts,
+}: {
+  label: string;
+  field: string;
+  value?: Criterion;
+  onChange: (c?: Criterion) => void;
+  accounts: string[];
+}) {
   const [q, setQ] = useState("");
   const facets = useFacets(field, q, accounts);
   const vals = value?.values ?? [];
@@ -58,7 +74,19 @@ function FacetCriterion({ label, field, value, onChange, accounts }: { label: st
   );
 }
 
-function ParamRow({ cond, keys, accounts, onChange, onRemove }: { cond: ParamCondition; keys: { key: string; label: string }[]; accounts: string[]; onChange: (c: ParamCondition) => void; onRemove: () => void }) {
+function ParamRow({
+  cond,
+  keys,
+  accounts,
+  onChange,
+  onRemove,
+}: {
+  cond: ParamCondition;
+  keys: { key: string; label: string }[];
+  accounts: string[];
+  onChange: (c: ParamCondition) => void;
+  onRemove: () => void;
+}) {
   const [q, setQ] = useState("");
   const needsValues = cond.op !== "exists" && cond.op !== "not_exists";
   const facets = useFacets(`param.${cond.key}`, q, accounts, !!cond.key && needsValues);
@@ -88,7 +116,12 @@ function ParamRow({ cond, keys, accounts, onChange, onRemove }: { cond: ParamCon
         />
       )}
       {cond.op === "contains" && (
-        <Input className="h-8 w-40" placeholder="chuỗi con" value={cond.values?.[0] ?? ""} onChange={(e) => onChange({ ...cond, values: e.target.value ? [e.target.value] : [] })} />
+        <Input
+          className="h-8 w-40"
+          placeholder="chuỗi con"
+          value={cond.values?.[0] ?? ""}
+          onChange={(e) => onChange({ ...cond, values: e.target.value ? [e.target.value] : [] })}
+        />
       )}
       <Button variant="ghost" size="icon" onClick={onRemove} aria-label="Bỏ điều kiện">
         <Trash2 />
@@ -122,7 +155,19 @@ const RADIO = {
 } as const;
 
 /** Bảng tiêu chí lọc chi tiết. AND giữa tiêu chí, OR trong cùng tiêu chí, NOT từng tiêu chí. */
-export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: { value: ClickFilters; onChange: (f: ClickFilters) => void; accounts: string[]; isAdmin: boolean; lockLinks?: boolean }) {
+export function FilterPanel({
+  value,
+  onChange,
+  accounts,
+  isAdmin,
+  lockLinks,
+}: {
+  value: ClickFilters;
+  onChange: (f: ClickFilters) => void;
+  accounts: string[];
+  isAdmin: boolean;
+  lockLinks?: boolean;
+}) {
   const set = (patch: Partial<ClickFilters>) => onChange({ ...value, ...patch });
   const params = useQuery({
     queryKey: ["params-registry-light"],
@@ -154,7 +199,12 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
         <fieldset className="space-y-1">
           <Label>Khung giờ (giờ Việt Nam)</Label>
           <div className="flex items-center gap-1">
-            <Select className="h-8" aria-label="Từ giờ" value={value.hour_from ?? ""} onChange={(e) => set({ hour_from: e.target.value === "" ? undefined : Number(e.target.value), hour_to: value.hour_to ?? 23 })}>
+            <Select
+              className="h-8"
+              aria-label="Từ giờ"
+              value={value.hour_from ?? ""}
+              onChange={(e) => set({ hour_from: e.target.value === "" ? undefined : Number(e.target.value), hour_to: value.hour_to ?? 23 })}
+            >
               <option value="">Cả ngày</option>
               {Array.from({ length: 24 }, (_, h) => (
                 <option key={h} value={h}>
@@ -210,7 +260,11 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
         {(["quality", "visit"] as const).map((k) => (
           <fieldset key={k} className="space-y-1">
             <Label>{k === "quality" ? "Chất lượng" : "Lượt truy cập"}</Label>
-            <Select className="h-8 w-full" value={value[k] ?? "all"} onChange={(e) => set({ [k]: e.target.value === "all" ? undefined : e.target.value } as Partial<ClickFilters>)}>
+            <Select
+              className="h-8 w-full"
+              value={value[k] ?? "all"}
+              onChange={(e) => set({ [k]: e.target.value === "all" ? undefined : e.target.value } as Partial<ClickFilters>)}
+            >
               {RADIO[k].map(([v, l]) => (
                 <option key={v} value={v}>
                   {l}
@@ -222,7 +276,11 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
         {(["campaign_presence", "ctv_presence"] as const).map((k) => (
           <fieldset key={k} className="space-y-1">
             <Label>{k === "campaign_presence" ? "Chiến dịch" : "CTV"}</Label>
-            <Select className="h-8 w-full" value={value[k] ?? "any"} onChange={(e) => set({ [k]: e.target.value === "any" ? undefined : e.target.value } as Partial<ClickFilters>)}>
+            <Select
+              className="h-8 w-full"
+              value={value[k] ?? "any"}
+              onChange={(e) => set({ [k]: e.target.value === "any" ? undefined : e.target.value } as Partial<ClickFilters>)}
+            >
               {RADIO[k].map(([v, l]) => (
                 <option key={v} value={v}>
                   {l}
@@ -233,7 +291,11 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
         ))}
         <fieldset className="space-y-1">
           <Label>Link custom</Label>
-          <Select className="h-8 w-full" value={value.is_custom === undefined ? "" : String(value.is_custom)} onChange={(e) => set({ is_custom: e.target.value === "" ? undefined : e.target.value === "true" })}>
+          <Select
+            className="h-8 w-full"
+            value={value.is_custom === undefined ? "" : String(value.is_custom)}
+            onChange={(e) => set({ is_custom: e.target.value === "" ? undefined : e.target.value === "true" })}
+          >
             <option value="">Tất cả</option>
             <option value="true">Chỉ link custom</option>
             <option value="false">Chỉ link sinh tự động</option>
@@ -242,9 +304,21 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
         <fieldset className="space-y-1">
           <Label>Ngày tạo link</Label>
           <div className="flex items-center gap-1">
-            <Input type="date" className="h-8" aria-label="Link tạo từ ngày" value={value.link_created_from ?? ""} onChange={(e) => set({ link_created_from: e.target.value || undefined })} />
+            <Input
+              type="date"
+              className="h-8"
+              aria-label="Link tạo từ ngày"
+              value={value.link_created_from ?? ""}
+              onChange={(e) => set({ link_created_from: e.target.value || undefined })}
+            />
             <span>–</span>
-            <Input type="date" className="h-8" aria-label="Link tạo đến ngày" value={value.link_created_to ?? ""} onChange={(e) => set({ link_created_to: e.target.value || undefined })} />
+            <Input
+              type="date"
+              className="h-8"
+              aria-label="Link tạo đến ngày"
+              value={value.link_created_to ?? ""}
+              onChange={(e) => set({ link_created_to: e.target.value || undefined })}
+            />
           </div>
         </fieldset>
       </div>
@@ -259,7 +333,11 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
               placeholder="abc123, xyz789…"
               defaultValue={(value.links?.values ?? []).join("\n")}
               onBlur={(e) => {
-                const v = e.target.value.split(/[\s,;]+/).map((s) => s.replace(/^.*\//, "").trim()).filter(Boolean).slice(0, 500);
+                const v = e.target.value
+                  .split(/[\s,;]+/)
+                  .map((s) => s.replace(/^.*\//, "").trim())
+                  .filter(Boolean)
+                  .slice(0, 500);
                 set({ links: v.length ? { values: v, exclude: value.links?.exclude } : undefined });
               }}
             />
@@ -274,7 +352,11 @@ export function FilterPanel({ value, onChange, accounts, isAdmin, lockLinks }: {
               placeholder="113.161.20.5, 27.72.0.0/16"
               defaultValue={(value.ip?.values ?? []).join("\n")}
               onBlur={(e) => {
-                const v = e.target.value.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean).slice(0, 200);
+                const v = e.target.value
+                  .split(/[\s,;]+/)
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                  .slice(0, 200);
                 set({ ip: v.length ? { values: v } : undefined });
               }}
             />

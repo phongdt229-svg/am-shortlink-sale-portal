@@ -37,7 +37,9 @@ export function CTVsTable({ page }: { page: Page }) {
     {
       id: "suspicious_clicks",
       header: "Nghi vấn",
-      cell: ({ row }) => <span className={cn(row.original.metrics.suspicious_clicks > 0 && "text-destructive")}>{fmtNumber(row.original.metrics.suspicious_clicks)}</span>,
+      cell: ({ row }) => (
+        <span className={cn(row.original.metrics.suspicious_clicks > 0 && "text-destructive")}>{fmtNumber(row.original.metrics.suspicious_clicks)}</span>
+      ),
       meta: { align: "right", sortKey: "suspicious_clicks" },
     },
     n("ctr_per_link", "Click/link"),

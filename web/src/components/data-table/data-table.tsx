@@ -72,16 +72,18 @@ export function DataTable<T>({ columns, data, total, pageSize, searchPlaceholder
                   return (
                     <th
                       key={h.id}
-                      className={cn("whitespace-nowrap px-3 py-2 text-left text-xs font-medium text-muted-foreground", meta.align === "right" && "text-right", meta.className)}
+                      className={cn(
+                        "whitespace-nowrap px-3 py-2 text-left text-xs font-medium text-muted-foreground",
+                        meta.align === "right" && "text-right",
+                        meta.className,
+                      )}
                       aria-sort={active ? (st.order === "asc" ? "ascending" : "descending") : undefined}
                     >
                       {meta.sortKey ? (
                         <button
                           type="button"
                           className={cn("inline-flex items-center gap-1 hover:text-foreground", active && "text-foreground")}
-                          onClick={() =>
-                            void setSt({ sort: meta.sortKey!, order: active && st.order === "desc" ? "asc" : "desc", page: null })
-                          }
+                          onClick={() => void setSt({ sort: meta.sortKey!, order: active && st.order === "desc" ? "asc" : "desc", page: null })}
                         >
                           {flexRender(h.column.columnDef.header, h.getContext())}
                           <Icon className={cn("size-3", !active && "opacity-40")} />
@@ -118,7 +120,13 @@ export function DataTable<T>({ columns, data, total, pageSize, searchPlaceholder
           {fmtNumber(total)} dòng · trang {page}/{pages}
         </span>
         <div className="flex gap-1">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => void setSt({ page: page - 1 === 1 ? null : page - 1 })} aria-label="Trang trước">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => void setSt({ page: page - 1 === 1 ? null : page - 1 })}
+            aria-label="Trang trước"
+          >
             <ChevronLeft />
           </Button>
           <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => void setSt({ page: page + 1 })} aria-label="Trang sau">

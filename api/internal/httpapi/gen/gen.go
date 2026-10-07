@@ -183,6 +183,81 @@ func (e ExplorerResultSource) Valid() bool {
 	}
 }
 
+// Defines values for ExportJobStatus.
+const (
+	Done    ExportJobStatus = "done"
+	Expired ExportJobStatus = "expired"
+	Failed  ExportJobStatus = "failed"
+	Queued  ExportJobStatus = "queued"
+	Running ExportJobStatus = "running"
+)
+
+// Valid indicates whether the value is a known member of the ExportJobStatus enum.
+func (e ExportJobStatus) Valid() bool {
+	switch e {
+	case Done:
+		return true
+	case Expired:
+		return true
+	case Failed:
+		return true
+	case Queued:
+		return true
+	case Running:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ExportRequestFormat.
+const (
+	Csv  ExportRequestFormat = "csv"
+	Xlsx ExportRequestFormat = "xlsx"
+)
+
+// Valid indicates whether the value is a known member of the ExportRequestFormat enum.
+func (e ExportRequestFormat) Valid() bool {
+	switch e {
+	case Csv:
+		return true
+	case Xlsx:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ExportRequestKind.
+const (
+	ExportRequestKindAccounts  ExportRequestKind = "accounts"
+	ExportRequestKindCampaigns ExportRequestKind = "campaigns"
+	ExportRequestKindClicks    ExportRequestKind = "clicks"
+	ExportRequestKindCtvs      ExportRequestKind = "ctvs"
+	ExportRequestKindExplorer  ExportRequestKind = "explorer"
+	ExportRequestKindLinksTop  ExportRequestKind = "links_top"
+)
+
+// Valid indicates whether the value is a known member of the ExportRequestKind enum.
+func (e ExportRequestKind) Valid() bool {
+	switch e {
+	case ExportRequestKindAccounts:
+		return true
+	case ExportRequestKindCampaigns:
+		return true
+	case ExportRequestKindClicks:
+		return true
+	case ExportRequestKindCtvs:
+		return true
+	case ExportRequestKindExplorer:
+		return true
+	case ExportRequestKindLinksTop:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for Granularity.
 const (
 	Day   Granularity = "day"
@@ -246,6 +321,69 @@ func (e ParamConditionOp) Valid() bool {
 	case In:
 		return true
 	case NotExists:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ParamRegistryItemPii.
+const (
+	ParamRegistryItemPiiDrop ParamRegistryItemPii = "drop"
+	ParamRegistryItemPiiHash ParamRegistryItemPii = "hash"
+	ParamRegistryItemPiiNone ParamRegistryItemPii = "none"
+)
+
+// Valid indicates whether the value is a known member of the ParamRegistryItemPii enum.
+func (e ParamRegistryItemPii) Valid() bool {
+	switch e {
+	case ParamRegistryItemPiiDrop:
+		return true
+	case ParamRegistryItemPiiHash:
+		return true
+	case ParamRegistryItemPiiNone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ParamRegistryItemStatus.
+const (
+	ParamRegistryItemStatusActive          ParamRegistryItemStatus = "active"
+	ParamRegistryItemStatusDisabled        ParamRegistryItemStatus = "disabled"
+	ParamRegistryItemStatusHighCardinality ParamRegistryItemStatus = "high_cardinality"
+)
+
+// Valid indicates whether the value is a known member of the ParamRegistryItemStatus enum.
+func (e ParamRegistryItemStatus) Valid() bool {
+	switch e {
+	case ParamRegistryItemStatusActive:
+		return true
+	case ParamRegistryItemStatusDisabled:
+		return true
+	case ParamRegistryItemStatusHighCardinality:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ParamRegistryUpdatePii.
+const (
+	ParamRegistryUpdatePiiDrop ParamRegistryUpdatePii = "drop"
+	ParamRegistryUpdatePiiHash ParamRegistryUpdatePii = "hash"
+	ParamRegistryUpdatePiiNone ParamRegistryUpdatePii = "none"
+)
+
+// Valid indicates whether the value is a known member of the ParamRegistryUpdatePii enum.
+func (e ParamRegistryUpdatePii) Valid() bool {
+	switch e {
+	case ParamRegistryUpdatePiiDrop:
+		return true
+	case ParamRegistryUpdatePiiHash:
+		return true
+	case ParamRegistryUpdatePiiNone:
 		return true
 	default:
 		return false
@@ -762,6 +900,47 @@ type ExplorerTotals struct {
 	Metrics ExplorerMetrics `json:"metrics"`
 }
 
+// ExportJob defines model for ExportJob.
+type ExportJob struct {
+	CreatedAt  time.Time       `json:"created_at"`
+	CreatedBy  string          `json:"created_by"`
+	Error      *string         `json:"error,omitempty"`
+	ExpiresAt  time.Time       `json:"expires_at"`
+	FinishedAt *time.Time      `json:"finished_at,omitempty"`
+	Format     string          `json:"format"`
+	Id         string          `json:"id"`
+	Kind       string          `json:"kind"`
+	Name       string          `json:"name"`
+	Rows       *int64          `json:"rows,omitempty"`
+	SizeBytes  *int64          `json:"size_bytes,omitempty"`
+	Status     ExportJobStatus `json:"status"`
+}
+
+// ExportJobStatus defines model for ExportJob.Status.
+type ExportJobStatus string
+
+// ExportJobList defines model for ExportJobList.
+type ExportJobList struct {
+	Items []ExportJob `json:"items"`
+}
+
+// ExportRequest defines model for ExportRequest.
+type ExportRequest struct {
+	Format ExportRequestFormat `json:"format"`
+	Kind   ExportRequestKind   `json:"kind"`
+	Name   *string             `json:"name,omitempty"`
+
+	// Params Tham số như màn hình nguồn: from, to, account, campaign, ctv, prefix, compare (+ mode, dead_days cho links_top;
+	// filters cho clicks; nguyên ExplorerQuery cho explorer)
+	Params map[string]interface{} `json:"params"`
+}
+
+// ExportRequestFormat defines model for ExportRequest.Format.
+type ExportRequestFormat string
+
+// ExportRequestKind defines model for ExportRequest.Kind.
+type ExportRequestKind string
+
 // FacetItem defines model for FacetItem.
 type FacetItem struct {
 	Clicks int64  `json:"clicks"`
@@ -775,6 +954,33 @@ type FacetList struct {
 	Items []FacetItem `json:"items"`
 }
 
+// FlaggedClick defines model for FlaggedClick.
+type FlaggedClick struct {
+	AccessPrefix *string `json:"access_prefix,omitempty"`
+	Browser      string  `json:"browser"`
+	CampaignCode *string `json:"campaign_code,omitempty"`
+	Code         string  `json:"code"`
+	Country      string  `json:"country"`
+	CtvDisplay   *string `json:"ctv_display,omitempty"`
+	CtvRef       *string `json:"ctv_ref,omitempty"`
+	Device       string  `json:"device"`
+
+	// Ip Che với vai trò khác admin
+	Ip           string    `json:"ip"`
+	IsBot        bool      `json:"is_bot"`
+	IsRepeat     bool      `json:"is_repeat"`
+	IsSuspicious bool      `json:"is_suspicious"`
+	LongUrl      *string   `json:"long_url,omitempty"`
+	Os           string    `json:"os"`
+	Owner        string    `json:"owner"`
+	Prefix       *string   `json:"prefix,omitempty"`
+	Province     *string   `json:"province,omitempty"`
+	Reasons      []string  `json:"reasons"`
+	RefererHost  *string   `json:"referer_host,omitempty"`
+	SourceGroup  string    `json:"source_group"`
+	Ts           time.Time `json:"ts"`
+}
+
 // Granularity defines model for Granularity.
 type Granularity string
 
@@ -785,6 +991,18 @@ type HeatmapCell struct {
 
 	// Weekday 0 = Chủ nhật
 	Weekday int `json:"weekday"`
+}
+
+// IPStat defines model for IPStat.
+type IPStat struct {
+	Accounts         int64      `json:"accounts"`
+	BotClicks        int64      `json:"bot_clicks"`
+	Clicks           int64      `json:"clicks"`
+	Country          *string    `json:"country,omitempty"`
+	Ip               string     `json:"ip"`
+	LastSeen         *time.Time `json:"last_seen,omitempty"`
+	Links            int64      `json:"links"`
+	SuspiciousClicks int64      `json:"suspicious_clicks"`
 }
 
 // Kpis defines model for Kpis.
@@ -916,6 +1134,58 @@ type ParamCondition struct {
 // ParamConditionOp defines model for ParamCondition.Op.
 type ParamConditionOp string
 
+// ParamRegistryItem defines model for ParamRegistryItem.
+type ParamRegistryItem struct {
+	Backfill *struct {
+		Error    *string             `json:"error,omitempty"`
+		From     *openapi_types.Date `json:"from,omitempty"`
+		Progress *float64            `json:"progress,omitempty"`
+		Status   *string             `json:"status,omitempty"`
+	} `json:"backfill,omitempty"`
+
+	// InRegistry false = mới thấy trên link, chưa đăng ký
+	InRegistry *bool  `json:"in_registry,omitempty"`
+	Key        string `json:"key"`
+	Label      string `json:"label"`
+
+	// Links Số link mang tham số
+	Links     int64                `json:"links"`
+	MaxValues *int                 `json:"max_values,omitempty"`
+	Pii       ParamRegistryItemPii `json:"pii"`
+
+	// Samples Ví dụ giá trị (ẩn với PII)
+	Samples   *[]string               `json:"samples,omitempty"`
+	Status    ParamRegistryItemStatus `json:"status"`
+	Tracked   bool                    `json:"tracked"`
+	UpdatedAt *time.Time              `json:"updated_at,omitempty"`
+	UpdatedBy *string                 `json:"updated_by,omitempty"`
+
+	// Values Số giá trị khác nhau (tối đa 10.000)
+	Values int64 `json:"values"`
+}
+
+// ParamRegistryItemPii defines model for ParamRegistryItem.Pii.
+type ParamRegistryItemPii string
+
+// ParamRegistryItemStatus defines model for ParamRegistryItem.Status.
+type ParamRegistryItemStatus string
+
+// ParamRegistryList defines model for ParamRegistryList.
+type ParamRegistryList struct {
+	Items []ParamRegistryItem `json:"items"`
+}
+
+// ParamRegistryUpdate defines model for ParamRegistryUpdate.
+type ParamRegistryUpdate struct {
+	Label     *string                 `json:"label,omitempty"`
+	MaxValues *int                    `json:"max_values,omitempty"`
+	Pii       *ParamRegistryUpdatePii `json:"pii,omitempty"`
+	Tracked   *bool                   `json:"tracked,omitempty"`
+}
+
+// ParamRegistryUpdatePii defines model for ParamRegistryUpdate.Pii.
+type ParamRegistryUpdatePii string
+
 // ParamReport defines model for ParamReport.
 type ParamReport struct {
 	Page     int             `json:"page"`
@@ -1012,6 +1282,18 @@ type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// RepeatRow defines model for RepeatRow.
+type RepeatRow struct {
+	Clicks int64  `json:"clicks"`
+	Key    string `json:"key"`
+	Label  string `json:"label"`
+
+	// RepeatRate 1 - unique / clicks
+	RepeatRate       float64 `json:"repeat_rate"`
+	SuspiciousClicks int64   `json:"suspicious_clicks"`
+	UniqueClicks     int64   `json:"unique_clicks"`
+}
+
 // ReportSummary defines model for ReportSummary.
 type ReportSummary struct {
 	Breakdowns Breakdowns    `json:"breakdowns"`
@@ -1082,6 +1364,14 @@ type SeriesPoint struct {
 // SortOrder defines model for SortOrder.
 type SortOrder string
 
+// SourceBotRow defines model for SourceBotRow.
+type SourceBotRow struct {
+	BotClicks   int64   `json:"bot_clicks"`
+	BotRate     float64 `json:"bot_rate"`
+	SourceGroup string  `json:"source_group"`
+	Total       int64   `json:"total"`
+}
+
 // TokenPair defines model for TokenPair.
 type TokenPair struct {
 	AccessExpiresAt  time.Time `json:"access_expires_at"`
@@ -1101,6 +1391,22 @@ type TopItem struct {
 	Owner            *string `json:"owner,omitempty"`
 	SuspiciousClicks *int64  `json:"suspicious_clicks,omitempty"`
 	UniqueClicks     int64   `json:"unique_clicks"`
+}
+
+// TrafficQuality defines model for TrafficQuality.
+type TrafficQuality struct {
+	BotBySource      []SourceBotRow `json:"bot_by_source"`
+	Flagged          []FlaggedClick `json:"flagged"`
+	Period           Period         `json:"period"`
+	RepeatByCampaign []RepeatRow    `json:"repeat_by_campaign"`
+	RepeatByCtv      []RepeatRow    `json:"repeat_by_ctv"`
+	TopIps           []IPStat       `json:"top_ips"`
+	Totals           struct {
+		BotClicks        int64 `json:"bot_clicks"`
+		Clicks           int64 `json:"clicks"`
+		RepeatClicks     int64 `json:"repeat_clicks"`
+		SuspiciousClicks int64 `json:"suspicious_clicks"`
+	} `json:"totals"`
 }
 
 // UnidentifiedReport defines model for UnidentifiedReport.
@@ -1532,6 +1838,27 @@ type GetParamReportParams struct {
 	Order *Order `form:"order,omitempty" json:"order,omitempty"`
 }
 
+// GetTrafficQualityParams defines parameters for GetTrafficQuality.
+type GetTrafficQualityParams struct {
+	// From Ngày bắt đầu (gồm), theo ngày lịch Asia/Ho_Chi_Minh
+	From From `form:"from" json:"from"`
+
+	// To Ngày kết thúc (gồm trọn ngày). Số liệu tổng hợp tối đa 12 tháng.
+	To To `form:"to" json:"to"`
+
+	// Account Lọc theo tài khoản (lặp lại tham số cho nhiều giá trị). Ngoài phạm vi → 403.
+	Account *Account `form:"account,omitempty" json:"account,omitempty"`
+
+	// Campaign Mã chiến dịch (lặp lại cho nhiều giá trị; `-` = không gắn chiến dịch)
+	Campaign *Campaign `form:"campaign,omitempty" json:"campaign,omitempty"`
+
+	// Ctv CTV — SĐT (mọi định dạng, tự chuẩn hoá), hash hoặc ctv_ref; `-` = chưa định danh
+	Ctv *Ctv `form:"ctv,omitempty" json:"ctv,omitempty"`
+
+	// Prefix Prefix cấp cho link (`sale`, `lm`…)
+	Prefix *Prefix `form:"prefix,omitempty" json:"prefix,omitempty"`
+}
+
 // ShareSavedReportJSONBody defines parameters for ShareSavedReport.
 type ShareSavedReportJSONBody struct {
 	Enabled bool `json:"enabled"`
@@ -1545,6 +1872,12 @@ type LogoutJSONRequestBody = RefreshRequest
 
 // RefreshTokenJSONRequestBody defines body for RefreshToken for application/json ContentType.
 type RefreshTokenJSONRequestBody = RefreshRequest
+
+// CreateExportJSONRequestBody defines body for CreateExport for application/json ContentType.
+type CreateExportJSONRequestBody = ExportRequest
+
+// UpdateParamRegistryJSONRequestBody defines body for UpdateParamRegistry for application/json ContentType.
+type UpdateParamRegistryJSONRequestBody = ParamRegistryUpdate
 
 // QueryClicksJSONRequestBody defines body for QueryClicks for application/json ContentType.
 type QueryClicksJSONRequestBody = ExplorerQuery
@@ -1569,6 +1902,18 @@ type ServerInterface interface {
 	// RefreshToken Đổi refresh token lấy cặp token mới (xoay vòng refresh token)
 	// (POST /v1/auth/refresh)
 	RefreshToken(w http.ResponseWriter, r *http.Request)
+	// ListExports R8 — Job xuất dữ liệu của tôi (admin thấy tất cả)
+	// (GET /v1/exports)
+	ListExports(w http.ResponseWriter, r *http.Request)
+	// CreateExport R8 — Tạo job xuất CSV / XLSX (chạy nền, file giữ 7 ngày, ≤ 1 triệu dòng)
+	// (POST /v1/exports)
+	CreateExport(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/exports/{id})
+	GetExport(w http.ResponseWriter, r *http.Request, id SavedId)
+
+	// (GET /v1/exports/{id}/download)
+	DownloadExport(w http.ResponseWriter, r *http.Request, id SavedId)
 	// ListFilterAccounts Tài khoản trong phạm vi người dùng (cho bộ lọc)
 	// (GET /v1/filters/accounts)
 	ListFilterAccounts(w http.ResponseWriter, r *http.Request, params ListFilterAccountsParams)
@@ -1584,6 +1929,12 @@ type ServerInterface interface {
 	// GetMe Người dùng hiện tại + phạm vi dữ liệu
 	// (GET /v1/me)
 	GetMe(w http.ResponseWriter, r *http.Request)
+	// ListParamRegistry §4.1 c3 — Tham số đã xuất hiện trên link + trạng thái theo dõi (admin)
+	// (GET /v1/param-registry)
+	ListParamRegistry(w http.ResponseWriter, r *http.Request)
+	// UpdateParamRegistry §4.1 c3 — Bật / tắt theo dõi, nhãn, PII, ngưỡng (admin). Bật mới → Service chạy backfill.
+	// (PATCH /v1/param-registry/{key})
+	UpdateParamRegistry(w http.ResponseWriter, r *http.Request, key string)
 	// ListAccountReports R2 — Danh sách tài khoản kèm chỉ số
 	// (GET /v1/reports/accounts)
 	ListAccountReports(w http.ResponseWriter, r *http.Request, params ListAccountReportsParams)
@@ -1635,6 +1986,9 @@ type ServerInterface interface {
 	// GetParamReport §4.1 c2 — Giá trị của một tham số + chỉ số, timeline top 5, cảnh báo dữ liệu
 	// (GET /v1/reports/params/{key})
 	GetParamReport(w http.ResponseWriter, r *http.Request, key string, params GetParamReportParams)
+	// GetTrafficQuality R7 — Chất lượng traffic & chống gian lận (admin, ≤ 3 tháng)
+	// (GET /v1/reports/traffic-quality)
+	GetTrafficQuality(w http.ResponseWriter, r *http.Request, params GetTrafficQualityParams)
 	// ListSavedReports Báo cáo / bộ lọc đã lưu của tôi
 	// (GET /v1/saved-reports)
 	ListSavedReports(w http.ResponseWriter, r *http.Request)
@@ -1680,6 +2034,28 @@ func (_ Unimplemented) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ListExports R8 — Job xuất dữ liệu của tôi (admin thấy tất cả)
+// (GET /v1/exports)
+func (_ Unimplemented) ListExports(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateExport R8 — Tạo job xuất CSV / XLSX (chạy nền, file giữ 7 ngày, ≤ 1 triệu dòng)
+// (POST /v1/exports)
+func (_ Unimplemented) CreateExport(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (GET /v1/exports/{id})
+func (_ Unimplemented) GetExport(w http.ResponseWriter, r *http.Request, id SavedId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (GET /v1/exports/{id}/download)
+func (_ Unimplemented) DownloadExport(w http.ResponseWriter, r *http.Request, id SavedId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ListFilterAccounts Tài khoản trong phạm vi người dùng (cho bộ lọc)
 // (GET /v1/filters/accounts)
 func (_ Unimplemented) ListFilterAccounts(w http.ResponseWriter, r *http.Request, params ListFilterAccountsParams) {
@@ -1707,6 +2083,18 @@ func (_ Unimplemented) GetLinkQrcode(w http.ResponseWriter, r *http.Request, cod
 // GetMe Người dùng hiện tại + phạm vi dữ liệu
 // (GET /v1/me)
 func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListParamRegistry §4.1 c3 — Tham số đã xuất hiện trên link + trạng thái theo dõi (admin)
+// (GET /v1/param-registry)
+func (_ Unimplemented) ListParamRegistry(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateParamRegistry §4.1 c3 — Bật / tắt theo dõi, nhãn, PII, ngưỡng (admin). Bật mới → Service chạy backfill.
+// (PATCH /v1/param-registry/{key})
+func (_ Unimplemented) UpdateParamRegistry(w http.ResponseWriter, r *http.Request, key string) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -1812,6 +2200,12 @@ func (_ Unimplemented) GetParamReport(w http.ResponseWriter, r *http.Request, ke
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// GetTrafficQuality R7 — Chất lượng traffic & chống gian lận (admin, ≤ 3 tháng)
+// (GET /v1/reports/traffic-quality)
+func (_ Unimplemented) GetTrafficQuality(w http.ResponseWriter, r *http.Request, params GetTrafficQualityParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ListSavedReports Báo cáo / bộ lọc đã lưu của tôi
 // (GET /v1/saved-reports)
 func (_ Unimplemented) ListSavedReports(w http.ResponseWriter, r *http.Request) {
@@ -1892,6 +2286,86 @@ func (siw *ServerInterfaceWrapper) RefreshToken(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RefreshToken(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListExports operation middleware
+func (siw *ServerInterfaceWrapper) ListExports(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListExports(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateExport operation middleware
+func (siw *ServerInterfaceWrapper) CreateExport(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateExport(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetExport operation middleware
+func (siw *ServerInterfaceWrapper) GetExport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id SavedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetExport(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DownloadExport operation middleware
+func (siw *ServerInterfaceWrapper) DownloadExport(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id SavedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DownloadExport(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2067,6 +2541,46 @@ func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListParamRegistry operation middleware
+func (siw *ServerInterfaceWrapper) ListParamRegistry(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListParamRegistry(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateParamRegistry operation middleware
+func (siw *ServerInterfaceWrapper) UpdateParamRegistry(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", chi.URLParam(r, "key"), &key, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateParamRegistry(w, r, key)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4017,6 +4531,104 @@ func (siw *ServerInterfaceWrapper) GetParamReport(w http.ResponseWriter, r *http
 	handler.ServeHTTP(w, r)
 }
 
+// GetTrafficQuality operation middleware
+func (siw *ServerInterfaceWrapper) GetTrafficQuality(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTrafficQualityParams
+
+	// ------------- Required query parameter "from" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "from", r.URL.Query(), &params.From, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "from"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "from", Err: err})
+		}
+		return
+	}
+
+	// ------------- Required query parameter "to" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "to", r.URL.Query(), &params.To, runtime.BindQueryParameterOptions{Type: "string", Format: "date"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "to"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "to", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "account" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "account", r.URL.Query(), &params.Account, runtime.BindQueryParameterOptions{Type: "array", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "account"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "account", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "campaign" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "campaign", r.URL.Query(), &params.Campaign, runtime.BindQueryParameterOptions{Type: "array", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "campaign"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "campaign", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "ctv" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "ctv", r.URL.Query(), &params.Ctv, runtime.BindQueryParameterOptions{Type: "array", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "ctv"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ctv", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "prefix" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "prefix", r.URL.Query(), &params.Prefix, runtime.BindQueryParameterOptions{Type: "array", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "prefix"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "prefix", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTrafficQuality(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ListSavedReports operation middleware
 func (siw *ServerInterfaceWrapper) ListSavedReports(w http.ResponseWriter, r *http.Request) {
 
@@ -4384,6 +4996,27 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/v1/saved-reports/{id}/share", wrapper.ShareSavedReport)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/reports/traffic-quality", wrapper.GetTrafficQuality)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/exports", wrapper.ListExports)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/exports", wrapper.CreateExport)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/exports/{id}", wrapper.GetExport)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/exports/{id}/download", wrapper.DownloadExport)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/param-registry", wrapper.ListParamRegistry)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/v1/param-registry/{key}", wrapper.UpdateParamRegistry)
+	})
 
 	return r
 }
@@ -4550,6 +5183,269 @@ func (response RefreshToken401ApplicationProblemPlusJSONResponse) VisitRefreshTo
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListExportsRequestObject struct {
+}
+
+type ListExportsResponseObject interface {
+	VisitListExportsResponse(w http.ResponseWriter) error
+}
+
+type ListExports200JSONResponse ExportJobList
+
+func (response ListExports200JSONResponse) VisitListExportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListExports401ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ListExports401ApplicationProblemPlusJSONResponse) VisitListExportsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateExportRequestObject struct {
+	Body *CreateExportJSONRequestBody
+}
+
+type CreateExportResponseObject interface {
+	VisitCreateExportResponse(w http.ResponseWriter) error
+}
+
+type CreateExport202JSONResponse ExportJob
+
+func (response CreateExport202JSONResponse) VisitCreateExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateExport400ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateExport400ApplicationProblemPlusJSONResponse) VisitCreateExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateExport401ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateExport401ApplicationProblemPlusJSONResponse) VisitCreateExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateExport403ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateExport403ApplicationProblemPlusJSONResponse) VisitCreateExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateExport429ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateExport429ApplicationProblemPlusJSONResponse) VisitCreateExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetExportRequestObject struct {
+	Id SavedId `json:"id"`
+}
+
+type GetExportResponseObject interface {
+	VisitGetExportResponse(w http.ResponseWriter) error
+}
+
+type GetExport200JSONResponse ExportJob
+
+func (response GetExport200JSONResponse) VisitGetExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetExport401ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetExport401ApplicationProblemPlusJSONResponse) VisitGetExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetExport404ApplicationProblemPlusJSONResponse Problem
+
+func (response GetExport404ApplicationProblemPlusJSONResponse) VisitGetExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadExportRequestObject struct {
+	Id SavedId `json:"id"`
+}
+
+type DownloadExportResponseObject interface {
+	VisitDownloadExportResponse(w http.ResponseWriter) error
+}
+
+type DownloadExport200ResponseHeaders struct {
+	ContentDisposition *string
+}
+
+type DownloadExport200ApplicationoctetStreamResponse struct {
+	Body          io.Reader
+	Headers       DownloadExport200ResponseHeaders
+	ContentLength int64
+}
+
+func (response DownloadExport200ApplicationoctetStreamResponse) VisitDownloadExportResponse(w http.ResponseWriter) error {
+
+	w.Header().Set("Content-Type", "application/octet-stream")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	if response.Headers.ContentDisposition != nil {
+		w.Header().Set("Content-Disposition", fmt.Sprint(*response.Headers.ContentDisposition))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type DownloadExport401ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DownloadExport401ApplicationProblemPlusJSONResponse) VisitDownloadExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadExport404ApplicationProblemPlusJSONResponse Problem
+
+func (response DownloadExport404ApplicationProblemPlusJSONResponse) VisitDownloadExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadExport409ApplicationProblemPlusJSONResponse Problem
+
+func (response DownloadExport409ApplicationProblemPlusJSONResponse) VisitDownloadExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DownloadExport410ApplicationProblemPlusJSONResponse Problem
+
+func (response DownloadExport410ApplicationProblemPlusJSONResponse) VisitDownloadExportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(410)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -4773,6 +5669,124 @@ func (response GetMe401ApplicationProblemPlusJSONResponse) VisitGetMeResponse(w 
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListParamRegistryRequestObject struct {
+}
+
+type ListParamRegistryResponseObject interface {
+	VisitListParamRegistryResponse(w http.ResponseWriter) error
+}
+
+type ListParamRegistry200JSONResponse ParamRegistryList
+
+func (response ListParamRegistry200JSONResponse) VisitListParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListParamRegistry401ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ListParamRegistry401ApplicationProblemPlusJSONResponse) VisitListParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListParamRegistry403ApplicationProblemPlusJSONResponse Problem
+
+func (response ListParamRegistry403ApplicationProblemPlusJSONResponse) VisitListParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateParamRegistryRequestObject struct {
+	Key  string `json:"key"`
+	Body *UpdateParamRegistryJSONRequestBody
+}
+
+type UpdateParamRegistryResponseObject interface {
+	VisitUpdateParamRegistryResponse(w http.ResponseWriter) error
+}
+
+type UpdateParamRegistry200JSONResponse ParamRegistryItem
+
+func (response UpdateParamRegistry200JSONResponse) VisitUpdateParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateParamRegistry400ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateParamRegistry400ApplicationProblemPlusJSONResponse) VisitUpdateParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateParamRegistry401ApplicationProblemPlusJSONResponse Problem
+
+func (response UpdateParamRegistry401ApplicationProblemPlusJSONResponse) VisitUpdateParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateParamRegistry403ApplicationProblemPlusJSONResponse Problem
+
+func (response UpdateParamRegistry403ApplicationProblemPlusJSONResponse) VisitUpdateParamRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -5932,6 +6946,72 @@ func (response GetParamReport404ApplicationProblemPlusJSONResponse) VisitGetPara
 	return err
 }
 
+type GetTrafficQualityRequestObject struct {
+	Params GetTrafficQualityParams
+}
+
+type GetTrafficQualityResponseObject interface {
+	VisitGetTrafficQualityResponse(w http.ResponseWriter) error
+}
+
+type GetTrafficQuality200JSONResponse TrafficQuality
+
+func (response GetTrafficQuality200JSONResponse) VisitGetTrafficQualityResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTrafficQuality400ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetTrafficQuality400ApplicationProblemPlusJSONResponse) VisitGetTrafficQualityResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTrafficQuality401ApplicationProblemPlusJSONResponse Problem
+
+func (response GetTrafficQuality401ApplicationProblemPlusJSONResponse) VisitGetTrafficQualityResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTrafficQuality403ApplicationProblemPlusJSONResponse Problem
+
+func (response GetTrafficQuality403ApplicationProblemPlusJSONResponse) VisitGetTrafficQualityResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListSavedReportsRequestObject struct {
 }
 
@@ -6302,6 +7382,18 @@ type StrictServerInterface interface {
 	// RefreshToken Đổi refresh token lấy cặp token mới (xoay vòng refresh token)
 	// (POST /v1/auth/refresh)
 	RefreshToken(ctx context.Context, request RefreshTokenRequestObject) (RefreshTokenResponseObject, error)
+	// ListExports R8 — Job xuất dữ liệu của tôi (admin thấy tất cả)
+	// (GET /v1/exports)
+	ListExports(ctx context.Context, request ListExportsRequestObject) (ListExportsResponseObject, error)
+	// CreateExport R8 — Tạo job xuất CSV / XLSX (chạy nền, file giữ 7 ngày, ≤ 1 triệu dòng)
+	// (POST /v1/exports)
+	CreateExport(ctx context.Context, request CreateExportRequestObject) (CreateExportResponseObject, error)
+
+	// (GET /v1/exports/{id})
+	GetExport(ctx context.Context, request GetExportRequestObject) (GetExportResponseObject, error)
+
+	// (GET /v1/exports/{id}/download)
+	DownloadExport(ctx context.Context, request DownloadExportRequestObject) (DownloadExportResponseObject, error)
 	// ListFilterAccounts Tài khoản trong phạm vi người dùng (cho bộ lọc)
 	// (GET /v1/filters/accounts)
 	ListFilterAccounts(ctx context.Context, request ListFilterAccountsRequestObject) (ListFilterAccountsResponseObject, error)
@@ -6317,6 +7409,12 @@ type StrictServerInterface interface {
 	// GetMe Người dùng hiện tại + phạm vi dữ liệu
 	// (GET /v1/me)
 	GetMe(ctx context.Context, request GetMeRequestObject) (GetMeResponseObject, error)
+	// ListParamRegistry §4.1 c3 — Tham số đã xuất hiện trên link + trạng thái theo dõi (admin)
+	// (GET /v1/param-registry)
+	ListParamRegistry(ctx context.Context, request ListParamRegistryRequestObject) (ListParamRegistryResponseObject, error)
+	// UpdateParamRegistry §4.1 c3 — Bật / tắt theo dõi, nhãn, PII, ngưỡng (admin). Bật mới → Service chạy backfill.
+	// (PATCH /v1/param-registry/{key})
+	UpdateParamRegistry(ctx context.Context, request UpdateParamRegistryRequestObject) (UpdateParamRegistryResponseObject, error)
 	// ListAccountReports R2 — Danh sách tài khoản kèm chỉ số
 	// (GET /v1/reports/accounts)
 	ListAccountReports(ctx context.Context, request ListAccountReportsRequestObject) (ListAccountReportsResponseObject, error)
@@ -6368,6 +7466,9 @@ type StrictServerInterface interface {
 	// GetParamReport §4.1 c2 — Giá trị của một tham số + chỉ số, timeline top 5, cảnh báo dữ liệu
 	// (GET /v1/reports/params/{key})
 	GetParamReport(ctx context.Context, request GetParamReportRequestObject) (GetParamReportResponseObject, error)
+	// GetTrafficQuality R7 — Chất lượng traffic & chống gian lận (admin, ≤ 3 tháng)
+	// (GET /v1/reports/traffic-quality)
+	GetTrafficQuality(ctx context.Context, request GetTrafficQualityRequestObject) (GetTrafficQualityResponseObject, error)
 	// ListSavedReports Báo cáo / bộ lọc đã lưu của tôi
 	// (GET /v1/saved-reports)
 	ListSavedReports(ctx context.Context, request ListSavedReportsRequestObject) (ListSavedReportsResponseObject, error)
@@ -6523,6 +7624,113 @@ func (sh *strictHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ListExports operation middleware
+func (sh *strictHandler) ListExports(w http.ResponseWriter, r *http.Request) {
+	var request ListExportsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListExports(ctx, request.(ListExportsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListExports")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListExportsResponseObject); ok {
+		if err := validResponse.VisitListExportsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateExport operation middleware
+func (sh *strictHandler) CreateExport(w http.ResponseWriter, r *http.Request) {
+	var request CreateExportRequestObject
+
+	var body CreateExportJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateExport(ctx, request.(CreateExportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateExport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateExportResponseObject); ok {
+		if err := validResponse.VisitCreateExportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetExport operation middleware
+func (sh *strictHandler) GetExport(w http.ResponseWriter, r *http.Request, id SavedId) {
+	var request GetExportRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetExport(ctx, request.(GetExportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetExport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetExportResponseObject); ok {
+		if err := validResponse.VisitGetExportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DownloadExport operation middleware
+func (sh *strictHandler) DownloadExport(w http.ResponseWriter, r *http.Request, id SavedId) {
+	var request DownloadExportRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DownloadExport(ctx, request.(DownloadExportRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DownloadExport")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DownloadExportResponseObject); ok {
+		if err := validResponse.VisitDownloadExportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListFilterAccounts operation middleware
 func (sh *strictHandler) ListFilterAccounts(w http.ResponseWriter, r *http.Request, params ListFilterAccountsParams) {
 	var request ListFilterAccountsRequestObject
@@ -6643,6 +7851,63 @@ func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetMeResponseObject); ok {
 		if err := validResponse.VisitGetMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListParamRegistry operation middleware
+func (sh *strictHandler) ListParamRegistry(w http.ResponseWriter, r *http.Request) {
+	var request ListParamRegistryRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListParamRegistry(ctx, request.(ListParamRegistryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListParamRegistry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListParamRegistryResponseObject); ok {
+		if err := validResponse.VisitListParamRegistryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateParamRegistry operation middleware
+func (sh *strictHandler) UpdateParamRegistry(w http.ResponseWriter, r *http.Request, key string) {
+	var request UpdateParamRegistryRequestObject
+
+	request.Key = key
+
+	var body UpdateParamRegistryJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateParamRegistry(ctx, request.(UpdateParamRegistryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateParamRegistry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateParamRegistryResponseObject); ok {
+		if err := validResponse.VisitUpdateParamRegistryResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7102,6 +8367,32 @@ func (sh *strictHandler) GetParamReport(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
+// GetTrafficQuality operation middleware
+func (sh *strictHandler) GetTrafficQuality(w http.ResponseWriter, r *http.Request, params GetTrafficQualityParams) {
+	var request GetTrafficQualityRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTrafficQuality(ctx, request.(GetTrafficQualityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTrafficQuality")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTrafficQualityResponseObject); ok {
+		if err := validResponse.VisitGetTrafficQualityResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ListSavedReports operation middleware
 func (sh *strictHandler) ListSavedReports(w http.ResponseWriter, r *http.Request) {
 	var request ListSavedReportsRequestObject
@@ -7306,135 +8597,157 @@ func (sh *strictHandler) ShareSavedReport(w http.ResponseWriter, r *http.Request
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"7D1tb9zGmX9lsHcHrBBGK8l2LpXhD46apG78okhK7kNsrCjuaDld7pAmhyuphoAEAa4oguDqyxVFEASN",
-	"6kt96TVI2vRQ3C4OAbpG/gf9Sw7zzJAckkMuuVopVup+SL0iOW/P++s8aFnu0HMppixorT9oeaZvDjHD",
-	"Pvy6blluSBn/Zw8Hlk88RlzaWm/djCYfWojZ2EVs+hlBA9uNxo8oajvR+K8ecqLxCUHMNocoiCYPkWW7",
-	"iNokmrwXoj6ZniDmR5MPlpbR7b7LP/fsaHwyRCOCnv7rv6PLK5eWW0YLH3qO28OtdeaH2GgRPu/9EPtH",
-	"LaNFzSFurbdMuT6jFVg2Hpp8oYThISx+aB7exLTP7Nb6S5eNFjvy+CcB8wntt44N/vyGeHd1ZSV5bvq+",
-	"ecQfB+zI4X/Yd/0h/71hDj2T9GnxMG5NHyHLJtH4W4p60eQDy86eg373V9Hui7voGhrY07/QPupH469o",
-	"bpileqdgxSs7l2Nwh57p4+IpbLtoFE0+IWgQTb5BzP/u62jyiYUcvm/K//gealvT/6V9gRK0P/3siG9Q",
-	"uyM5ibqhHt43Q4e11vdNJ8DJQvdc18EmbR3ztbFRcV0bO2+jp+/+B9p+8qsd1B5Gkw8JevIwmnxAbdSL",
-	"xie0byAWTf6ELDuMxl9QZLvTkyUD2WZgI47Wf7WQxUZdH+/HILPs774200FMatcEFBvNhNGaAoS5gfSa",
-	"7w6LJ3GbHznai8ZfMb748eMQtfvR5KPhkiFIGWCCHIHC1wNidn7idjds0r1FYIu6Pe3zqYyWj++HxMe9",
-	"ePvpJvmaTNZab/VMxiGa29ux0XrdN2nomD5hR3Aqmln6yivq4P/o4/3WeusfOikX64inQUcdlk9zkwwJ",
-	"K5vAgYdafLuyAudPhuFQgmdIqPi1mmyHUIb72IeJ7vg97JdN5MLDunvYdn0mhuMDb5p9XDaux59p1786",
-	"c8F83G3y88qxuwF/YTEHtOnjfXJYRFDxd2RF48894JoOoQPU3g1MB+8aaNcZ7j599/c1uaInJplFb5fW",
-	"ZpDbbGp7s7iTnekfh4KmOFeZ/IYgy6WoLXm9Z09/R9EeiSa/YMh2TcRszi0/pf0yhng/sw9l+asadnFs",
-	"tLbNEe7d6CUA9Uxmp6ORXiXFVksMPrrra3SCHV9uAgXR+CsPHUbjbz3UHvXQruUQaxBwEIaU3A9xN/0D",
-	"xQddDmbxNMA+XyP/t+X28G7ZeQR8BSVrvqw9kR23jCEOovG3DDF7OrYkPwQB/SGVMmoZbXOBxQXZL0Iu",
-	"Kn5N+8iOJo88/uMhlyYmWl3jI5zQ/nLJipl7Ki55zD8OPJcGGDB403f3HAxM3nIpw0JJMz3PIZbJt9fx",
-	"xBsv/CxwQWepx3DicWHGgs73G4LaW69toB9dvvLPSJ1gCc5YDqJojnfkxw9anu962GdELD8GNP93EVbp",
-	"Mb2TvnkvORR372fYYpzyMrPcJAErzpTQfPKPqu1nl32cp/3c2sSQFQvbwp4kleyiYo2t/sJi7XPLPSgu",
-	"y2gF4XBo+kezRhHr2ZYv83Fcr2uxUf117Lge54y6NfCxgJIXMdgcCJKegqEcsLJHdYlVQHMPNBCzTdqP",
-	"+VaWYN1wz+Gz09BxTP5PSdxyfBoO97jcM1pDzHxizTyVW/K1eU8hnqZ6i7EusQBqKcFJT86QVwAMRZ/Q",
-	"PmYuM52KR/VPUEuv8QRGrDOp6o2cQHt2DtbSMughD4pKhINHGLaBKVeF3mkRus+FwIHpU/6K0bJ8wohl",
-	"Osp0ig6CgyB7giWgF/MYYiHpd7otvOJjc9BzDyiQXXErRewmlL10uWVoQDHAR9ptB7bWPNyJJr+UcrWP",
-	"mD/9A41FKczaMjQUlaOg3L75Aox4zfG8lbsOils2LQsHQddLNNJaiJ89Rw3u7/nuQSCNgIUMCIQmGPxi",
-	"BuzhEbHw4sZzg8WN5eN97C/y9AI39C3c7ftu6C1q1Bw2yvOEg0jhn5s63VoKUSOHgzoM3th5+6brDsTi",
-	"T8Oxk4HKTopyInTIz3GvSMKvJ74rFJhhxl+C2uBeGUWT99DKYfy/JXC8PHkI/jGMaDT+NkSJDRSNHxFk",
-	"9oaEtjTsT6jPM5lfomWn6zYq9LLs/ksYYDcRQAUWlvArxNzpZxQxO5p8SlCfmBS1QbNYFmMsqQytnIla",
-	"bNTtkcBzTD0zlY4n7bN94gcM1JmuyQo2xIuMDLHuYB1zrq9ixa7Gpko0FqPlHlBB1UWhYQ49BzdUH28S",
-	"OrjBZeos2oxPMXve8XrizRlZ8OcPOHdyJdi1ZdLBIlQrOdTfiWql7LZIk1kSyTmdOddJGEz7ycNo8li6",
-	"oYGzLKEOOHJ1KK3QVtGfD7EL4Y0P0TCafIraPXBeC9Xlra2bS1eRH01+Q/tlDmGNRtdU/y+lJN+kAx0Y",
-	"ayJ+vBI5UBlISqxXkyvCDawE0Jt1Os2ireDTcNPmrKdkEdXcLztF4Z3F2PU1sUBvLsfMUEJZixvydSUW",
-	"lMWQftajX9tLbzTlktmFlCk1HvaJ25vp+hJv5U9PfmzkYhAVOoZmUfWtxgUyiQD7edlTGWuA1zddQtls",
-	"iSpszZzHIZmy6ljKXIKlJ1LPAaKuaPb0i/AV5jY0v7Mw4Wpl3sKykwHCNumA/1yMYlGOS6dwMC7IKViJ",
-	"ggovUw5llsdPlSdn4vKLQZdVMLZivQHiWxUJAGVqS0lWBsQpNnbeRtb0Gwhdn0Cgd/Ix7aO2MFtkQBsm",
-	"HnI9aQkx36V9iNrXs1mEWgxxipKIigwuM8JVJc1a9DPqIx9S7YbVJ5PO/GZhXLQm30uBMgPNFmIbVGtB",
-	"PzjjgIP+NeLESUk5o5xM/xAiy55+iRxIShJ43v7b48vLq+bSMrp++8eoT6LJVyaypicWYKX4wEB3tiQu",
-	"isSU9NEyX161o7ASQj5hXG0AqWB6pDvCfiClXu3vFB9i7W9iRY6vM8DUwplAfcuknEPG/mjx64BAaJj/",
-	"nxsyrStacT7WXwkbNVgE6WHKyD4B901IlZ+69fRwwLq2K0R47RWlHs/an9hu6Hf3ZTJNmuJwSclwWNGx",
-	"SPiOaSLOr0N42YrGjwAnP0V0+tnRVZTMg+6GKyuXMJIDoGvofmgiGk2+5Obl9A/DltFkHcRrtF0SdK0w",
-	"YGK7+fwqYRl0LR+bDPeSU5nNvtWvxJnU+iZotHS32euQ5lif427y1zdc2iOxqledIeL57ojQhsh2PzQd",
-	"aTApxOI4CrGMTAdyN/ZcyH4IA49YxA2FuaYPI0mHc3NyyfvMa384IgFhVbsQv0CNAI+4h0093znAeNAz",
-	"jzRcfwVdQxt2NHmMqB2Nv2QtI5PcI0jipVnkUdAv9bJnITKbD1SmdOND1rVCP3D9Cl3RhjSVXjT5Sqai",
-	"aHPpaloc8Wpmx8MKQFHEUlFQxOKn3GQpf5DIGK3KO69fJ+X6hUeCO+ayRW0s/YcjkyDmT//M9fMTqzxQ",
-	"QYIuJ0ctxyRBV6J32WOFhvU816X9bug7eo9S0NDNXgFWlWXNZCJF8zDHLIqOraBurCGHxCxIQ9uxv75m",
-	"rC2NsBH+UwIqf+wqlLS0kvC2ArI8+ZVI6h5weqRoVVEgIfJ1Zyujeaq53/jQcsIeRtfQ7Ts7BWVTPq2T",
-	"9mxwoRDmWJKaT3zlpcoExyvFfOIcBOT4urN59dBzXB/7b4hcgOwmemSo97Sae1gTXbttTx9RZJNo8r6I",
-	"q30gg4qxe1+mfhbGg/VVRiuF555bn+9LI6GDej5xnBd77gGFFEXJQgw0nD4C63hpJmby/cWzx7uqOqRb",
-	"qU2a57mMjJTgVw0bfM9l3UbZGnO83PWwD4vS+z4Kvg7hFxCGeuOAZPPPUhJudhKZDNRa3+R9AHHGSXak",
-	"DFB0yzOygC4ecxXyvBmHwwviOnYFLargw1LqXBY2plo0MoufWaKKY2HFEfup62Cmhha7GfhndQ0cEDfd",
-	"vSOdMiHkA7Wn3wzXkQSWgeIjNjjbMYDdiP9KvctAGTXMQIoLwUCJ9WvcpUISGsgNDCTloIFUMWggVXYb",
-	"SMpEA8Xy3kA988hAXNU20NClzDbA+hR/4s/uUrCWlsE0tQb4SNqo7bS+662tm+jJQ5P2Rc57b/o/xMgl",
-	"emzeuLF0l+b09BiuL1eDVdi5MYyLEHbiyo605oEjQs5R5HrotgCFAYt6TJE1/TOVRVr9aPKxh+62QNu7",
-	"21Lt7NWVWTUNhizrqF/NoepiiypLcH2WoGFseSW8Jza+zox7iYxAnRlXy+jPMVlZVgRZ8wmBVTHILRzA",
-	"jouhyJQ668ddxVcJb9XAm9mz4Z2sTdh9zcKQgCEjAEE972s82454mx+oe1DfQs0tVp9CV+RxATNZgK4J",
-	"PqCrkWg//eV/puURS1eFg5Z/IhOp7OlfxEuX4ncUdIXh0zRPPXrNdzrMD6llMl2mG/NDrppb028Ew0B7",
-	"XI0ULGI0/czN8AlNIaKKyfLgDDWQLFEyWbsElbqmSlw/q3DVAB81Rxiu/GsQpmYIJq8dq3jfSK8ryTuW",
-	"2NbJZBsH86UbB9lYd2nCcQ7XyrS2oCSCl6mo5jhYyJCuTCgMKgKDbTCm1ESlpaYzzAvX3HGm55ichly9",
-	"7kRfMy3MFpC0ntie5VZktVzKmnsavpRbsz7RYJ9gp6f3STXyKqbHMitaLmasSlvJVeGmKkTPVOM14hfX",
-	"DTkxcH1Ry5R/gk02NL0N7DinBBlXRhuGX6TmWsttXNdbnDvPeAq5vkpEeMMjQRm/rhdS3YB3gTlaoe/L",
-	"ar+ake151Y4mU8QcezGZVvEedYeZJP0WuWo2zrpQ57QMXzXxT5zOaa0EOHUe58owXaXLeB7fcGBz06Js",
-	"SK6iCWxJAjxgKbSMVo8EXN/ogc/WwUwbz9WnWKRzKjtKXcBZYBpKtbdYTQZm+cTH+OjL8KssESt2htVN",
-	"SvexhanqqDt1qGgh+aDSXEtTprLrLD0VrdbZhJX3ffeAG7dz6abzpAE1Bdicmuf35YmUgCwx6SvguIiI",
-	"ZkUK9OIzkJomFGn37vYJ3cL3Q6xTyTwzCA5cv5fvr7D2MugFyW8NlqlVujlHaeWX5SW8yWJ0+7iFm1gU",
-	"O6ox8eThd19Hk0cWOsRDNLAJ2jUdpxt/jK4hcMruql66ma4SdYRSS5rZ0fjzI1k0tRdNPs61jRLFGi2d",
-	"OxgPTaIXPL7rzNSftvg781ZSwwS5HSr2ih44qr6mr4J1oskvELNNSJSc/JqgwM01TWqvLK9dQdfQC2tX",
-	"/mnpKuK8EcCVfesaWtGkqZXEkuoz2pLYUoOk11N9zPwZgaeZQyQtReb8vpqf1x8HuNOpVlIuIeqOcVyK",
-	"o4EuXsHREzx54MeP/QS0bz/5wkSbN6/f7m6/uvX2jY1Xu9c3bywPe+hvj68sr83EQo03AjKQrek36Okv",
-	"P0ercdamjBmw6ZfURnsua56dfIrIaK7dCbBKhnzcIz62oEPMZ9RGFl9hEt1IVlrXPZPF7hJfVc7VXiP4",
-	"qsf5xessOZzOHRnAFGrhDt3pCWLR+ASwaPwtlflL9QF5au0oPZKS2MU8QZAMAHUC4M4I+yOCD8psiNMU",
-	"UqhidhHdWpoX4M0a8NlrJZP3xidGT+ZA8+fRoGtMLje0APBGuTyyqcascLvrqeY2vi96ThnQCsoksH58",
-	"SALYGHVZV/64V5Y9M3f20NrM7CHRpcP1ys+ujFLmtiIgXF0rpVehr0axMvj4bX5yJRYQR5m0/C5fsTDE",
-	"DqEYMddDV5SsMFXtzh2FS5qQfWUlX2NXt5xcB7/itksrSGTXm1OXDed9hgDrNH5WVWGSgERZTSlWbqd8",
-	"+gya5JTHIWbqTEORZhGnXrSFgpR00K3ZeKLCaWeTvt21TL9HqEhIV/x42virb1oD3OsGhOoCxGrzPAsU",
-	"TK71sWjy37LfKOX/ae+Z1mCfOM5SnZKwlGlp5koJSqbuUtsM0yhXQ41Sy87i6E/ibJQLyreSmIlei6hD",
-	"zXOyOatQszyt0sNQR9FVVYs67y8gel3L3BA4AESkIArHwYWGP5XgSBKYrqHGN2TNaRA1VXTTYKqizZTH",
-	"qjeTiE0uRFk3/e102T3aJYEvv6xOPANcXXSkVxY0SdSvB7NyNqDIRvli1ioXQsbqrk9BxmljUH0VebHX",
-	"iQONPYfTE+GQ+tBK/YTQvZVQqDvqWj6GujzTgWatEtW6jsvZP//LvuvvkV4P025guZ7o3qqJbbEyhx72",
-	"fTfXIaNu3Lx2t7w4EF7VJq/Yjwycxt0S1EplqcZeJszBFX5Ubh9A7yM+354bsvU9xwSv/oyyCP40Hj5Z",
-	"gm4zW3jfx4Fd6vj2xfMucweY6vJtFR/22sqsdWVH069HtWwLy9nLNOur1Z8NuKwtEg5qk5uaoKAB+UDG",
-	"7KuGgLh+ps/GbKW8qFDwQZIxDHX/6aa05yi934n+JguUQlELMyL4APtahQ2aQ5c2m5gj1D0/Sx4SivVR",
-	"7AGhvYyRK/OJqnMB52g9ljSaM3vChDedTeVEMrpGevogUFOaKcaEvF7DY9SJIBmHgLMwkl53SQxcjXAr",
-	"E6Ynq8MbBfo3qBeymRI2221cl6l9Olhlom0rM6NtteCV70wO9zxAeikXdJ9RZE//SG3UhlAUlAQZKE7L",
-	"NKAz+/shCMOPnr77e9HG0OIW1lFytQl2lVtLrGjy2ES0Dw3QCRpGk9+2Ckefd09qYDsDXotQM1Tin1/L",
-	"2E5Y3qIaPy3WxaHmMGVx4Q01hGYg5UaSvdAaYGYg6wkUoGEXqtC+gMtBVNfMonooZftJVXhZ1EGf/eKx",
-	"ppGINGWsopWMIDABIdQWfoOOhM9PzJgAWQhVHR3pWFiN/5xklc80Zk4ddEhz2GqFGEpjFFo8SMpHsvmZ",
-	"OLDU6nr4BX/Ucd0dLrI2TeKX1n7jQ4/4OGikAchPy+VhrBfOM3hBQ9VmYMy2yAvAyqza0Ow/P7d2H3J6",
-	"HcTiqMRCnIg5PgZtd588FBVmcH/IJ7SP2nH6AupAKWvuXqpOXOgqH5dUulY5KCuauH5feVBZp1yDdKi3",
-	"lE4zVUl/dZOhIK9qfidR193vloWjM/3ThROr2HVU01hdSrhEV5mj8iHvZbqnU20CbIVclG3zvUlTDps+",
-	"9q+HIuVP/Hotnvun/7ITX+ACmj88TZdiM+aJS0iITPbNHsf1zRuIRpOPicgmEox+0/WZ6aC96YmLLP4f",
-	"SCLli15GIrdh14NXXjzAe7uo/cprry2hfjT5kFxNqhXDPYdYyDfRDcqwTzFbvktvwaVhmQonCPvrkiSs",
-	"NIdit+daQUeTNbEr0iYMKadgmPx1W8tQLCndBy1z+GKyFyT3YHocmEnGc2tleXV5RUQHMeUP11uXlleW",
-	"L0EchNkAks5otWOGzO44bp8I55rMMuYoDxfH3Oi11kWuXCvxfLzi9o4qrpppdsVMJg/vOItsXHvPX3Wz",
-	"trKysLlT6ae54ObJr568T/uiNMDLpHvwU70slqEbPVluen0Of3+12ftrlxq+/6MG7ysU2lp/556SSZzb",
-	"9l40/hPktSjpeXAvU7CL2nuWf+QxEBhmPwARyqn7Hh9eRS1XmpVluMWfnw1y5bxdtdDrsq6zB5RJwcEc",
-	"htH4c9YcBSqOfMcOkR1NPiJI6hMI9AvUhs5g8ZVhh655hEbTPwvdteLE5SDlRy5PZSdRYp6Ngz8nut6A",
-	"uzjFCUPPy7Mn50pyg5zPLOAdSI+18gtF7RQHsl+UY4Rsd9BRA3Z9rKNDEjDR7+B6GjRS7399R7/d9JXO",
-	"m61jY+ZL4t7F43tnCP7iPWAaNLjzxnxwTKlW5Ym5sHvq/BHNZtqW7aLUu6SCK+5HUYBYJmY6A2QbSnDv",
-	"7GA2+8X4huAzBa+md/OC4MvfvzQvPmxkbStr+o0IMzPOvz+2SpGjDi6IeiZcBxU241fPEAKFYOdZ0NeP",
-	"uQUTTE8sG4ntZ6/+NFDcAars8MA86Tyw3B4+7tz344in9vxex4wbbW/6cQFZlog0t2bKF2vdm6m/llN/",
-	"u2r5xaqQfae0IVm7rLYhWXtZYxjPJkMyNPu444mW4ZoLKPcIlQmSxSsoc9e13n59Poq7PC+G3Jo+Qm9u",
-	"SWsPDCJoPdPevP26ihg+mPIKYgwr8eAWPkvSAb/T4onldlbe2KIFHYPoxAsK68k1jJQnNMTp4cjTqqcw",
-	"ZC62bC584GLqGmJlx20kfGa/mtzeXuddNqrzmrzFuM6Asv1VjVdrSWfpZqr1HtzrXOPdbREQmvme7F90",
-	"Dtpc4k8rp54ztsjnVw221iBmqEi0jEE9mP7XUPEUVbGuPHV2HsQe3uMqnpa9gLaOeFPr3uqIuLUSEXeu",
-	"HOCikHUm2HketCMDvBeXdDZsghgRV3MrpFOHVOrZUdlbV56Lsuei7Awt1wstyy7lZVkuqDiHNEtItKO0",
-	"BtWSqkS4Cn8HZBv1krRwnYnFTbegUrDN0en0itqVck3Tq4MdQeyGW1atc5eMDRjKuQmn/L1xF5gatl1O",
-	"C9RGa0/f/eiK5tqm+hQg/BVVylzugrACBRRTurPruYp2X9ytd93UKf0ez4RS2ESW/j3ohDn0ucBUpyiF",
-	"c1BckllRrhPGqSPPVUFjUciXaatdRL3i/V0pjNs/3b5zG6kjiFRc4fKybFft4g8VhfAuejXNP9ZpA/tJ",
-	"k2+9Q1ZexdKQxelGUutPNf7dKyvqbU6zmkyfLY9ILrq5kOzhJcCL29DUEQ2m/1feW9hAnj39HUXMNzkO",
-	"uRSSqv7tKrqxCXdIQzJOfPdLfbbS2TctXOE75VIc8Fi8pnfIFPBUlCrVkrwvzyV431wwQzqHWG/aVvVi",
-	"YuoeoKpyO0k2Uoza2dqCpasI8OCavgk//zjTh19B2aQMowxnk1IKfdYI3DmRiMSzSBrJ3m5xzjkjuc7x",
-	"FwSbjNaV+eNnMfZlxST8SSAflTdWqJdkig7ogJWrT9/96BKoXpP3QgMaWNxGL6Td0I1CK7N66CjbxpTr",
-	"ZWz03E333E13dtqPuBT74uo/l4GGX4nGj2gfHUbjbz1ki5o36Pqe2PyTj4bobquYOH63tVRL12GjoOO4",
-	"7kDc8qanV3jMMbqWknO/roKTa6d5qajunDGGiI19X/ihg/eObyIrmnwRApSBQ8ONae0hJKwnAAZMWEId",
-	"ZJuBDV8O7GjyiQcMntrocHpiwUWzhPbwIZSIQPlpPXzIXNdbof+qxRZa9PghcPL6LLo5Sz1L/NZUwlxg",
-	"RgiNCDvlZTLAFKFg3ohpwLKjyeP6TPCBj/erfbaxylIr+M63+kN1sZ4J9TyTftadty8W6ZwqF0+SmuKS",
-	"Bary8T66llQZDqPJp/mb4LiIqkVoIp2TuV6lbbDjejdlBe1zy6DEDzmUdyoUXZAVF8TJbv0ckU39vQ35",
-	"yNPbULPAJ7vGvwH8AL+EqHPrQ3U2taPx5yzGibQlV1vU1MlusbvMhfZBut3wsbtwL7h2S6uX1aTZl2d5",
-	"VS+apM6Uml5EEX1F6K6uF2fLY1eiQAcxqLgSzoPf0v5V8Qq3WDiHudtKTBnxwW2BWQ24yexgq3IByHll",
-	"hZ9vytwzKDmVM/8eUfryKVFaEYWAtu03Nm8YiMl2r3HgwZ8+MtDqyopEYZUp1sJjVzaYrsLhuAn1c5l4",
-	"YZXJXB/xC8npVwWnF90I7ocmLZAEc70MXciGZ0u5Bkt16AKAVO1GVtpNX0h18SzxrdCV9iJi3N8eX15e",
-	"RZbIIN6pup5aJC0G2X7BRtzjgQ6MTBMNBf8kmpWgX+fBAB9Vqhdqy/M6+oXobVLbQ/oDdQzMy6Gfhz9q",
-	"0/7fkesiwybUSDzUFQ6jycdMCaq/oOQ2p7JLdO83kBWNH1Fb9JzR19rlOUZgjnDvxViOVckrpVffmVb3",
-	"5lsMnkW94itJU56Omu0A9xE7330dt3hj07+o0j57VvegT6AuVWEDWmGqvQ3PJmGh0DyzVs7C6lnMr+9g",
-	"I0/zXOJRZUDS4XkHGlz1Og+ge0WlhNyGNxuISKa0NZlLSN47H9paZNOC+Uuoo8lvlQ5ZSadvyyYmCqLx",
-	"BJhi0rAAugJRyQHlLX4Km9P0OpBMFPqrDmwi+6a2GqLLA9I7Fl49B4vLPrN48mP4e5bgm+nz8O2Nnk6y",
-	"ljUEOnSnJ+cCrnL2V0o0Z3MSPzQ6qJArJrPs4tG+BW2VF3e6z4pIOnfAPmPOu8bMqJNc46HXQEBqfd94",
-	"krt5jIpLe2bfdxG/qens+Czi0rkJy1cgn7yDWDT+iiki8n5oInn5cikiZVuAZbthvnOPQznA/ihGDrhc",
-	"Hbpernc6jmuZju0GbP3llZdXACPkNA9inQd6fnHrMY7wYfWXWuGQZBiIlSl/yi5ZeSAtFuUvSe7m8b3j",
-	"/w8AAP//",
+	"7H1/j9zGleBXKfTtAT0wZ7pnJDnOCPpDnkTOxLI0nhnrFmfpethkTbPS7CqKLPbMRBBgI8AGQWBctL5F",
+	"YARGPKvz+uJbw944h+CmsTCwLfh7UJ9kUT9IFskim+zpHmkc5Q9H0ywWq1699+r9fo9aFhl5BENMg9bm",
+	"o5Zn+uYIUujzv25aFgkxZf+0YWD5yKOI4NZm63Y0+cgC1IEE0OlnCAwdEp09xaDtRmd/9YAbnZ0iQB1z",
+	"BIJo8gRYDgHYQdHkwxAM0PQUUD+a/HZlDdwZEPa650RnpyMwRuD5P/wjuNq9stYyWvDYc4kNW5vUD6HR",
+	"Quy7D0Pon7SMFjZHsLXZMuX6jFZgOXBksoUiCkd88SPz+DbEA+q0Nl+/arToicdeCaiP8KD12GDPt8XY",
+	"9W43eW76vnnCHgf0xGU/HBJ/xP7eMkeeiQa4CIx3pk+B5aDo7DsM7GjyW8vJwkG/++vgYPUA3ABDZ/oX",
+	"PACD6OxrnJtmpR4UrHhlFwIGMvJMHxahsEfAOJr8AYFhNPkWUP/7b6LJHyzgsn1j9uOHoG1N/z8eCJTA",
+	"g+lnJ2yD2h3Jj6gbsuGhGbq0tXlougFMFtonxIUmbj1ma6Pj4rq29u+B5x/8L7D37Hf7oD2KJh8h8OxJ",
+	"NPktdoAdnZ3igQFoNPk3YDlhdPYnDBwyPV0xgGMGDmBo/VcLWHTc8+FhfGSW8/03ZjqJiZ2aB0XHM89o",
+	"QzmEuQ/plk9GRUjcYSAH/ejsa8oWf/ZFCNqDaPLxaMUQpMzPBLgChW8GyOz8jPS2HNR7B/Et6vZ0yD5l",
+	"tHz4MEQ+tOPtp5tkazJpa7Nlm5SdaG5vj43WW76JQ9f0ET3hUNF8ZaAMUSf/Ox8etjZb/6WTcrGOeBp0",
+	"1GnZZ26jEaJlH3D5Qy2+Xety+KNROJLHM0JY/LWebAdhCgfQ5x+669vQL/sQ4Q/r7mGP+FRMxybeMQew",
+	"bF6PPdOuf33mgtm8e+iXlXP3AjZgMQDa8eEhOi4iqPgdWNHZ5x7nmi7CQ9A+CEwXHhjgwB0dPP/gX2py",
+	"RU98ZBa9XdmYQW6zqe3d4k72p/86EjTFuMrk9whYBIO25PWeM/1nDPoomvyaAoeYgDqMW36KB2UM8WFm",
+	"H8ry1zXs4rHR2jPH0N62kwP1TOqksyG7kmKrbww2O/E1MsG+LzcBgujsaw8cR2ffeaA9tsGB5SJrGLAj",
+	"DDF6GMJe+gOGRz12zOJpAH22RvZvi9jwoAweAVtByZqvaiGyT8oY4jA6+44C6kzPLMkP+QX9EZZ31BrY",
+	"YxcWu8h+HbKr4p/wADjR5KnH/njCbhMTrG+wGU7xYK1kxZSci0s+Zi8HHsEB5Bi845O+CzmTtwimUAhp",
+	"pue5yDLZ9jqeGPHaLwLCZZZ6DCeel3+xIPP9HoH27q0t8OOr134E1A+scBjLSRTJ8a58+VHL84kHfYrE",
+	"8uODZv8unlUKpvfTkQ8SoJD+L6BFGeVlvnIbBbT4pYTmk39UbT+77Md52s+tTUxZsbBd6ElSyS4qltjq",
+	"LyyWPnfJUXFZRisIRyPTP5k1i1jPnhzM5iFez6Lj+uvYJx7jjLo1sLk4JS9isjkQJIWCoQBY2aO6xKpD",
+	"I0eaE3NMPIj5VpZgSdh32ddx6Lom+6ckbjk/Dkd9du8ZrRGkPrJmQuUdOWxeKMSfqd5iLEssgFpKcNKT",
+	"X8gLAIYiT2gfU0JNt+JRfQhq6TX+gBHLTKp4Iz+ghZ0LtbTM5ZBHRSHChWPItwExE4XebyF8yC6BI9PH",
+	"bIjRsnxEkWW6yucUGQQGQRaCJUcvvmOIhaTv6bbwpg/NoU2OMCe74laK2I0wff1qy9AcxRCeaLcdOFr1",
+	"cD+a/EbeqwNA/emXOL5K+VdbhoaichSU2zdbgBGvOf5u5a6D4pZNy4JB0PMSibQW4mfhqMH9vk+OAqkE",
+	"LGRCTmiCwS9mQhuOkQUXNx8JFjeXDw+hv0joBST0Ldgb+CT0FjVrDhslPDkg0vPPfTrdWnqiRg4HdRi8",
+	"tX/vNiFDsfjzcOxkojJIYUaELvoltIsk/FZiuwKBGWbsJaDNzSvjaPIh6B7H/1vhhpdnT7h9DAIcnX0X",
+	"gkQHis6eImDaI4RbGvYnxOeZzC+RstN1GxVyWXb/JQywl1xABRaW8CtAyfQzDKgTTT5FYIBMDNpcslgT",
+	"c6yoDK2ciVp03LNR4LmmnplKw5P22SHyA8rFmZ5JCzrEKkUjqAOsa871VizY1dhUicRitMgRFlRdvDTM",
+	"kefChuLjbYSH2+xOnUWbMRSz8I7XE2/OyB5/HsA5yJVg166Jh4sQreRUfyOilbLbIk1mSSRndGZcJ2Ew",
+	"7WdPoskX0gzNOcsK6HBDrg6lFdoq2vO570JY40MwiiafgrbNjddCdHlv9/bKdeBHk9/jQZlBWCPRNZX/",
+	"SynJN/FQd4w1ET9eiZyo7EhKtFeTCcINtAQuN+tkmkVrwefhps1ZT8kiqrlf9hOFMYvR62tigV5djpmh",
+	"PGUtbsjhii8oiyGDrEW/tpXeaMolswspE2o86CNizzR9iVF56MmXjZwPokLG0Cyqvta4QCYRQD9/91T6",
+	"GvjwHYIwnX2jCl0zZ3FIPlkFljKTYClE6hlA1BXN/vwibIW5Dc1vLEy4Wpm1sAwynLBNPGR/LkawKMel",
+	"cxgYF2QUrERBhZcpQJll8VPvk6WY/OKjywoYu7HcwP1bFQEAZWJLSVQG91Ns7d8D1vRb7ro+5Y7eySd4",
+	"ANpCbZEObf7hEZOTVgD1CR5wr309nUWIxdxPUeJRkc5lipiopFmL/ot6z4cUu/nqk4/OfGdhXLQm30sP",
+	"ZQaaLUQ3qJaCfnDKATv6W8iNg5JySjmafhkCy5l+BVwelCTwvP0fX1xdWzdX1sDNOz8BAxRNvjaBNT21",
+	"OFaKFwxwd1fioghMSR+tseVVGworT8hHlIkN/FYwPdQbQz+Qt17t9xQbYu13YkGOrTOA2IIZR33LxIxD",
+	"xvZo8dcR4q5h9n8kpFpTtGJ8rL8SOm6wCGRDTNEh4uabECt/6tZjw4D2HCKu8NorSi2etV9xSOj3DmUw",
+	"TRricEWJcOjqWCR/j2o8zm9x97IVnT3lOPkpwNPPTq6D5DvgftjtXoFATgBugIehCXA0+Yqpl9MvRy2j",
+	"yTqQ12i7KOhZYUDFdvPxVUIz6Fk+NCm0E6jMZt/qWwImtd4JGi2dNBvOwxzrc9wdNnyLYBvFol51hIjn",
+	"kzHCDZHtYWi6UmFSiMV1FWIZmy6P3egTHv0QBh6yEAmFuqZ3I0mDc3NyydvMa784RgGiVbsQf3ExglvE",
+	"PWjq+c4RhEPbPNFw/S64AbacaPIFwE509hVtGZngHkESr88ij4J8qb97FnJns4nKhG54THtW6AfEr5AV",
+	"HR6mYkeTr2UoijaWrqbGEa9mtj+scCjKtVS8KOLrp1xlKX+Q3DFakXdeu07K9QuPBHfMRYs6UNoPxyYC",
+	"1J/+mcnnp1a5owIFPUaOWo6Jgp5E77LHCg3reS7Bg17ou3qLUtDQzF5xrCrLmslEiuphjlkUDVtBXV9D",
+	"DolpkLq2Y3t9TV9b6mFD7E95UHmwq6ekpZWEtxWQ5dnvRFD3kNEjBuuKAMk9X3d3M5KnGvsNjy03tCG4",
+	"Ae7c3S8Im/JpnbBng10KYY4lqfHE116vDHC8Vownzp2AnF8Hm58eey7xof+2iAXIbsJGI72l1exDjXft",
+	"jjN9ioGDosmvhF/tt9KpGJv3ZehnYT6+vkpvpbDcM+3zV1JJ6ADbR667apMjzEMUJQsxwGj6lGvHKzMx",
+	"k+0v/nq8qyogvZPqpHmeS9FYcX7V0MH7hPYaRWvMMbjnQZ8vSm/7KNg6hF1AKOqNHZLNX0tJuBkkMhGo",
+	"td7J2wDiiJPsTJlD0S3PyB50EcxVyPNu7A4vXNexKWhRCR+WkueysDnVpJFZ/MwSWRwLS444TE0HMyW0",
+	"2MzAXqur4PDrptc/0QkT4n7AzvTb0SaQh2WAGMQGYzsGZzfiv1LuMkBGDDOAYkIwQKL9GvexuAkNQAID",
+	"yHvQAOo1aAD17jaAvBMNEN/3BrDNEwMwUdsAI4KpY3DtU/zEnt3HXFta46qpNYQnUkdtp/ld7+3eBs+e",
+	"mHggYt7t6f9DRi7QY2d7e+U+zsnp8bm+UX2sQs+Nz7h4wm6c2ZHmPDBEyBmKiAfuiKMw+KK+wMCa/hnL",
+	"JK1BNPnEA/dbXNq731L17PXurJwGQ6Z11M/mUGWxRaUlEJ8maBhrXgnviZWvpXEvERGoU+NqKf05JivT",
+	"injUfEJgVQxyFwZ8x0VXZEqd9f2u4q2Et2rOmzqzzztZm9D7mrkhOYaM+RHUs77GX9sXoxlAyVF9DTW3",
+	"WH0IXZHHBdSkAbgh+IAuR6L9/Df/O02PWLkuDLTsFRlI5Uz/IgZdicco6MqnT8M89eg1H3SoH2LLpLpI",
+	"N+qHTDS3pt8KhgH6TIwULGI8/Yxk+IQmEVHFZAk4Q3UkS5RM1i6PSl1TJa4vy101hCfNEYYJ/xqEqemC",
+	"yUvHKt43kutK4o4ltnUy0cbBfOHGQdbXXRpwnMO1MqktKPHgZTKqGQ4WIqQrAwqDCsdgmytTaqDSStMv",
+	"zHuuOXCmcEygIVdfAlHi05+TvgbvpWm5ie4Qv9PX25Og7xO9AQUee8iHQaOPHSKMAqfhCuNROrOVrf15",
+	"iLDdJH4ivR7qEBf6Jez1Tyis/QI1qbBpxZz8YQhD7t7xQyzzH2yC2eYPTeTyJwK6Op9P3rLJRvMNJ5BK",
+	"Ppl4Z5VDNlQsyZxiJbItIkokxdz5A0TEHLvwYQh1C0pxJRHygnHLaB27wbH2xoxRJTHIKxSoRILJpCku",
+	"8PUo8dRsCyjJWzt/jHFqnuqGTsRP3TCmLXwrpruj7E1cUzk5PtE6sPP9N2A0/QwDZ/qv2AF4EEaTj/Em",
+	"YMKjASgxSlWuWLGSiilovwZGxGbKEDTtnm2eBEn+Md/69ftYqpH8dwGG6+yLJ9MvMcho6XxEDB+h8+RO",
+	"NH+z5BBZQkWHCbdMC9IFJO8kNrhya1o1BWbNXhr5LLdmPSkdIujqmVYzIkvBMovIxBerwvduueZgAG1u",
+	"DhDRru7dw9bm+7X9O/lN+tAMCG4U+JlbdDxDcbkPiuUTUt3PNlVHu/iLKfVMimGKvpZ2fwZNOjK9Lei6",
+	"58Qxh4R+Q7+5NDnU8vfVdfPlYBl/Qq6vEnO3d/aoSavltxdvrK1wnCGvxAIf0F4AIV5O/sd8ltn8bZi5",
+	"bmYaJ5Ko5fhodOf5toeCMsWpXmzTFh/LtRQr9H2Zdl8zxGxe/b/JJ2LVaTEhz/EedcBMsm+K5JENeFqo",
+	"l3geYf9c3mMl0kjn+q2Ml6n03c7jpA0c4tPSKYsytzDZMUkbBUzxt7nz1IW0jpAtna7pN5Udpb7Y7GEa",
+	"StmVWBzPiN7ZDIQY9GX4VRYRHXul6maH+dCCWGXC547ZWEhihrSbprHL2XWWQkVr/mlyZwx8csSk8rmM",
+	"RPPE4zY9sDlNQC/KJSgPssS2XnGOiwgtqshFWnwocNPIXu3eyQDhUm3WM4PgiPh2QYF8g8t5yd8aLFPL",
+	"ZeQ8lpVvltfSSBaj28c7sIlpb1+16j178v030eSpBY7hCAwdBA5M1+3FL4MbgHtHD1R32UyfhTpDqUmb",
+	"OtHZ5ycye7kfTT7J1W8UWZMtnV8WjkzklhiS3Jny0y4bM29JE/6B3A5nyHpZeU1fjsKNJr8G1DF5xsLk",
+	"nxAISK56Ybu7tnEN3ACvbVz7ryvXAeON/Liyo26AriZevCSooz6jLdEbGmSfnOtl6s+IAJk5RVLba873",
+	"q/l5/Xk4dzrXSspviLpzPC7F0UAXOMDQkxu5uEM9NtjjgfPsTybYuX3zTm/vp7v3trd+2ru5s702ssF/",
+	"fHFtbWMmFmrcAjwVyJp+C57/5nOwHqdPSOc9nX6FHdAntHma0Dm03lzdMc4qKfChjXxo8VJtn2EHWGyF",
+	"SZhBstK6fpIsdpc4jXI+7xpRUHqcX7zMksPpHMj4mfKk9GMyPQU0OjvlWHT2HZaBxPUP8tzSUQqSkiCC",
+	"eaIRMgeouwDujqE/RvCoTIc4T0ajes0uomxa80z4WRO+fDXd8m7xROnJADQPjwbl23JJGoUDbxRUK6tb",
+	"zYp7I56qbsOHovijwWsymggLTwkK+MYwoT35x4OyMNa5w3g3ZobxinJZxCuH3S4coID6J3r/Qt+0hodI",
+	"ZxUud5fWjqHzfDLwYRDUDDVNLR1FEbKwN4R7vtxZkVNyBAA3RC5sIh3zGh8iLC8u7fHsV+z2m/57qwJb",
+	"ykOdy+2pZTfySETTSV9XTde8edxL0Uij9CGkoisW7ldZH8X2M7iRr82jWey96VfAjiafK4HtoM1LQokM",
+	"ip3t7ZVGGkyFActBA6dnmb6NsMiSUmxa2qAg37SG0NYb5kLPbmxFjN8pCRlIwa45UAU+IpkEO2YI2kr1",
+	"2O5at9utVTNKS9WxFy7etThqxQYX37cVsfwZFrAIz3eRp8zvAc/M9Z4X251yVsGY2mpElip0konzzIV6",
+	"ar1U85FRBUY+Lt+xXnaZ267DXcu1Dk6ReBqFEfKX7zHgltik2CWeVibJJ3OPoIswBJR44JpCNyobyYGC",
+	"oCaCWGWRk8beb/lxHcYWt12aXC8Lgp67olLei8PPOg0trEq+T45EWU0pHe6lkvMS6ocu7M4EbaGyJs1F",
+	"atbkW/wt1AsQ1sXOqnXFLa7yMz2cRpP/K1sxYPafdix5rdSpljHHRZQEADbU8SuvouTqkQvKV9mbiV4L",
+	"u4JU3e0ct0/C084bDpBR9uqMX0Bgby0DkMABTkQKojAcXGhkqOKuTmJ2a8j8DVlzGl9aCA3IRrmVh/Hu",
+	"JD70XNRSXa3mfIkP2iVx72pZCa3M4daPHEVBL1GIH80KZ+ehl8obs1a5EDJWd30OMk57JugLbBXLQLq8",
+	"58FoeipcBB9ZqeeGN7ZAmJdk6Fk+5CVLTJf3sZCo1nMJY//sl0Pi95FtQ9wLLOKJxhaaaANa5mLhOnYW",
+	"YnVD6WoXEo9j46oqiBdLNXM3Xq8EtQqKumrBRNSFFXrhoxY85qon+16fhHSz75rczzojY5w9jadPlqDb",
+	"zC489GHglLoiffG8R8lQxErlUxEVr+JGd9a6srPp1+NBk57fvd9ctBL57z1fW9RrHawCYZ8FnQb5Ey/Q",
+	"H58VRUqNzOqudastOSPFHly0kmVqzdcqL85vQkeEXdZmiWqYpoYshzLSrWoKHg2XKRM5W3EqQppNksxh",
+	"qPtPN6WFo/QZJzK2rK8RilIOYwSPSqLLeW+j0lqJcwSIzX9tjhCGehNTPsQ+iZevTGWbo3J2Uie9KoK+",
+	"AH0u9KR8rdTaVR+MOjFBeu9lfHtcqj2JHFPjwpQPppDV4Y1y+tvYC+lMKSjbLKtbIx2i2VnlkxxmxKjU",
+	"Oq98Yy3eppBnRyI14aHNAzh4RQsDxFmFBm8s9quQCywfP//gX0QVfotpwSdJZ05IlKabVjT5wgR4wPt3",
+	"ITCKJn+cmbSgO9sZ57UIUVAl/vklwb2E5S2qbvFizVBq5G8WF95WA08MoDTU7IfWEFIDWM94/RRIeBGV",
+	"P/Helqr5bFElgLPlkCssYeqkL3/tk6b++zTQuqISqiAwcUKgLWw7HXk+PzNjAqQhL0rQkcaf9fjnJCl6",
+	"psJ5bsEpjfyu5Zgv9exr8SCpfpDNUoGBpRaH43/xH7WXP8+mfpPopeTGqMFe8AtBrOUC7cwyV7GVtyng",
+	"c6WrYmNtBtrJYnXQ3Wd3+Y6J/NKabvPkrspXywWFWKmZZ/KCeqUN6JxtTioAM7NqQ7P//Le1+5Cf1wPb",
+	"W1wHrRyD5+10nj0RlWN4X9A/4AFox9GQoMNLVOX6TXfiAlbycUkFqyoVsKI5y0utxmnPxzcPD5H1blpR",
+	"s8gn+ie9tKZFvdtR5T2aW/tQZA7Wz1pUMw3P3bYgUWf7Jz1tDacZUU7S8qC18STz5kozzT0lJV4PefXl",
+	"JZmJV+ZXCxZwFTQaLEFyAdkJZcXHZgbIZZf4YJY8n9z8SUmS+IzyCKBFNCNHUyk16OjzPaXCc1WOT93c",
+	"B55GMb8HokcOe2XRp5m+hcJDUuz2o2loKEXzRMmao+JI3oWhPcMAWiGTwffY3iTqQ9OH/s1QZPiIv27F",
+	"3/75f9uPGydzkwV/mi7FodQTzX+RzO3LguPmzjbA0eQTJJIHhIS6Q3xquqA/PSXAYv/hOWNs0WtAhDIf",
+	"eHzI6hHsH4D2m7durYBBNPkIXU+qhIV9F1nAN8E2ptDHkK7dx+/wZv2ZykI8ylcXE22lIdMHNrGCjiZI",
+	"+kBESRtSwObT5Nvcr4mEfWGbbpmj1WQvQO7B9NhhJgmOre7a+lpXBANCzB5utq6sddeucCc7dfiRdMbr",
+	"HTOkTsclAyQ8NzKpkKE8b9i8bbc2RWpMKzGrv0nsk4oWz81aO2fSbh5nkY36Icy3mN7odhf27VQ61TSW",
+	"fvY7HlzHM7u9THQ3g+pVsQzd7Mly07bVbPx6s/EbVxqO/3GD8QqFtjbff6AkDua23Y/O/o2HsSvZOLwf",
+	"enAA2n3LP/EoF+jMQcBFXEbdD9j0KmoRaQ8rwy32fDnIlXOl1EKvq7qKurw8EQfMcRidfU6bo0AFyPed",
+	"EDjR5GMEpLwPuPwP2rwif9yq/5iYJ2A8/bNQuisgLicpB7mEyn6iZLwcgL8gut6Kzv7qSQjz+Nrlk3Ml",
+	"ufEUr+zBuzze18ovFLRTHMi+UY4RkBfpEWZEqCM/FNCfyjFLPJFs8SLNqdx9ez6wJoDcfYMblH9O+pJE",
+	"1aL0sc1q+hckkwmToGo+lBGaCsMYag+4DVVHQ1vcTSC2tSQaytZXqkVCG4s/MP3VOH0qbggMfiFqSC39",
+	"Puwu+z7MY9I+z076RYpPW3v3QAf8/e29vwdt6bfA0eRDbIBD5EJRUx38SEhxBuD1JQH1Bf7Zeb6dYliW",
+	"UDuPkP24lFrfgjRBOR5ICUUN4ZIyQOkQ4aHYtluPH1wElS+Kwtn4q83OsRaAOzY5wi4x7VJI/0QOuFhw",
+	"E4tCuhpQH4p46BTsiZbWR1gmKOU8nQWA32JYmSKt8Hzbsub0lljA6k9Q4JEgyU1KP1iYfumHx8b/uNn4",
+	"9e6CkEOWUeuoQZOl96Uox30zDdxrhhvv8mpcMwbd5sWjl0qtcgNKQNwy7uVMgYFc6HPq3BW9ENqWQ0Dq",
+	"PVb5ZVwuvXBimbjVGUe2pQRYLu/MZg+UkF/u8Wpaiy6QK1+ZFx+2si4Ca/qtCPWlTM35xCpFjjq4IKr8",
+	"wDqosBMPXeIJFAJOl0FfPzGxA4LpqeXI8pGgfRCYLjwwwIE7OjBA3KCkDHjcitd5ZBEbPu489OOo0zL5",
+	"4zbCw3f9uKxSlogQ25Fn8s59IhAlLteUFVwNBYDZQBhNAI+cNo7TkfPKHJF0nsR1y3NSleypjatq6tTG",
+	"Gxpj9mwyRCNzADue6Gh7rlt5585bFyIHpRjyzvQpeHdXqkDcbsg7I7R37rylIoYPc3fiqBIP3oHLJB3u",
+	"Pl08sdzJ3jeO6JBEefTRawrryfUzkxAawRQ4HPNX1QzeUoaTyRJcKr8p5Eq+DAyftzwF1hWhVCVpULzk",
+	"t9Ss4nNIEpzBa4BmwsuSBh5qLSB5LHFhWv3RdB4N4cljkZ5ILad4RCJvM39IszmbcAPXYmyvX+VGdwp9",
+	"Ns3/eP/m6n83V3/ZXf1xb+3+/dUHr/2dhnE8WI5RQZeyesHWOU0GbjmavkxWhXK0fjM6+4ryav5nX1O1",
+	"2wx2pk+xAXa2tw0pzzCclji8Jt8Txr3n//CPYA/6Y2TBOCwyTrFbq8B2ybbraS5S8NyFscGvmRR8yyej",
+	"OvLtPmkkBc8eGsuytcbScZ1hQjirNaFsE1VjaC01QbqFa43bY2JOjbF7IvJ05jjZ5+cC1MrE/30JaXt3",
+	"g1O1IlpnHGDD6f8ZKZ7dKhkqT52dR3HEVKWRL0OntW4jtSxdnStpo0TWvlAOcFnIOhNVfRG0IyPJLy/p",
+	"bDkIUMRLeqmkU4dU6hl0YtR5dZW9usqWbkK71HfZlfxdlgvSneM2S0i0o7TQ1JKqRLgKwytPa7KTGgE6",
+	"W49FbGmoK7vY5ugIek3t3rihq/p0wmOtDolfi1G8MIZyYZdTfIgJE7m81LBHGC1gB2w8/+DjazmKaEYB",
+	"wnBaJcxlr6oiBRTz+7PruQ4OVg/ADWEYkYGJg+jsa1xc9zkNsC+FUNjkLv1bkAlz6HOJqU4RCueguCQS",
+	"ulwmjIPMX4mCxqKQL9N+uoh6+2j6ZQgsZ/qVbGFvpWfc/vne3TtAnUHk/Arbu+UQtds9Ly/FxyZty1p6",
+	"aeAwaYat9wxZoR8Qv9WQxelmUouRaRxN17qKn2ljVjPm5fIIBrjLK6K+zvHiDu+hBYbTfy/vwWsAz5n+",
+	"MwbUNxkOEcyTIP7ndbC9AywHCtPr2ESA+tM/12crnUPTghW2U3aLczwWw/QGmQKeiro1tW7eN+a6eN9d",
+	"MEO6gKCTtO3e5cTUPkfVt9JCZNmQFdDOFjFYuQ44HtzQN6tnL2f61WcjBGUvyxKcTWo26CNUedfHrTTv",
+	"aikBqml/yYv2IuU6rF8SbDJa1+Z35MfYl70m+U8C+bAj8nNpcisbslM4x8r15x98fIWLXpMPQ4NXM70D",
+	"Xku7hhuFTiP10FFWdS+Xy+j4lZnulZluedLP/r1dE19i+edq7ER+igfgODr7zgOOiH7g3dETnX/y8Qjc",
+	"bxUTPe+3VmrJOnQcdFxChqJMhJ5e+eMtnlBbQ8h52CQEQqlBdKUk4GF5GCI29qLwQ3fe+74JrGjyp5Cf",
+	"MufQe89+tw/aI55gmhwwx4QV0AGOGTj8zaETTf7gcQaPHXA8PbXAw9AECNvwmJdc4HWu6uFDqCQ9V8m/",
+	"anK0Fj1+CJy8PotuzlKXid+azPVLzAh5n6BOeVo7Z4o8hMaIacByoskX9ZngIx8eVttsY5GllvOdbfWH",
+	"amJdCvW8lHbW/XuXi3TOFRQsSU0xyXKq8uEhuJFU7RlFk0+TVmZMp32K+BVVi9BEXDklXqVusE+827JU",
+	"1yvNoMQOOZItj4smyLTwSlyoLPlBNtNliGzq2yoXGufwMET2sRvsHY4f3C4h6lIMeBk47PCIXYkTaX32",
+	"tqiBIZu5HVDCa0nrdsPm7tnmSaDf0vpVNXr/jVlW1ct2U2dKw1zGK/qakF2JF6ftQCJRoAMor5AgjAd/",
+	"xIPrYgjTWBiHud9KVBnxwh2BWQ24yWxnq9Kf+6LSUy42ZO4lvDkVmL9AlL56TpRWrkKOtu23d7YNQGXv",
+	"n9jx4E+fGmC925UorDLFWnhMZP/HKhyOe0S+uhMvrTCZa/N5KTn9uiyDwKuHPQxNXCAJSrwMXcjK6iu5",
+	"Ss516EKmNdTIo7q0huQHy86pUVsUXeKUmo1cpth7u7fBsyeiiVacBcaDFoNs8ygjrsmGh0am6F2N7Bnx",
+	"e5orVsaa1f53S0gS+4EaBubl0K/cHw3y6f5mTBcZNqF64nmC8yiafEIVp/prSmxzeneJVo4GL/yEHVEj",
+	"Up/0W8YxqCjmu/owreZbxjRydX9fSXXLpYccuC+l7PUjqZJwY4vLe3txzZrvDNwPu92N1zliP+Ft8Uxe",
+	"M+4rnJjFM0FTVfJXYI6hvRr/XCV+KT0ullo1I9+aYxl1AN5MasJ21OAdnpPufv+NWi9OAV4WVrNqw6k9",
+	"QZYTf1NoOlMrBGd9Gd8vrRLHoHkh7tWyQ9LheYfXV7Y7j3jxxEqBb4+PbCDxUaWq5lwy34OLoa0XWKJN",
+	"KU0STf6oFGhOuhhaDjJBEJ1NOBtMCgHJkoPiQpcFHNUqj8UaQlIm4H2Jhg6SifWthugS1+SzoQtFV45c",
+	"sTj+e5bgF1Yvrqwe7TGZnl5oRb0i+yslmuVA4odGBxX3SlWpksVB92W5ki78YF8yW3RjZtRJWhTrJRB+",
+	"a71oPMk2ToBYNCSf3cs3HqlpLPAy4tKFXZbZIjPpFfkwNLnRq+pWy1agzjZjeP8BO+UA+uMYOULflU0X",
+	"Njsdl1im65CAbr7RfaPLMUJ+5lEs8/CS00z7ix3WUP1LTdhJAmbEypSf4pKcyk/ZXSgPpE6efVtEJz9+",
+	"8Pg/AwAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

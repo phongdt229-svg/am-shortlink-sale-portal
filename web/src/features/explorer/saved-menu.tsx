@@ -20,8 +20,7 @@ export function SavedMenu({ state, globals }: { state: ExplorerState; globals: G
   const [copied, setCopied] = useState<string | null>(null);
   const list = useQuery({ queryKey: ["saved-reports"], queryFn: async () => unwrap(await browserApi.GET("/v1/saved-reports")) });
   const save = useMutation({
-    mutationFn: async () =>
-      unwrap(await browserApi.POST("/v1/saved-reports", { body: { name: name.trim(), kind: "explorer", query: { state, globals } } })),
+    mutationFn: async () => unwrap(await browserApi.POST("/v1/saved-reports", { body: { name: name.trim(), kind: "explorer", query: { state, globals } } })),
     onSuccess: () => {
       setName("");
       void qc.invalidateQueries({ queryKey: ["saved-reports"] });

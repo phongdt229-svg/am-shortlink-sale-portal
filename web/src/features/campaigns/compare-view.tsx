@@ -31,7 +31,11 @@ export function CompareView({ data, accounts }: { data: Compare | null; accounts
   const options = useQuery({
     queryKey: ["filters", "campaigns", q, accounts],
     queryFn: async () =>
-      unwrap(await browserApi.GET("/v1/filters/campaigns", { params: { query: { q: q || undefined, limit: 100, account: accounts.length ? accounts : undefined } } })),
+      unwrap(
+        await browserApi.GET("/v1/filters/campaigns", {
+          params: { query: { q: q || undefined, limit: 100, account: accounts.length ? accounts : undefined } },
+        }),
+      ),
   });
 
   const items = data?.items ?? [];
@@ -69,7 +73,10 @@ export function CompareView({ data, accounts }: { data: Compare | null; accounts
                     type="button"
                     aria-pressed={metric === m.key}
                     onClick={() => setMetric(m.key)}
-                    className={cn("rounded-md px-2 py-1 text-xs", metric === m.key ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-muted")}
+                    className={cn(
+                      "rounded-md px-2 py-1 text-xs",
+                      metric === m.key ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-muted",
+                    )}
                   >
                     {m.label}
                   </button>
@@ -80,18 +87,28 @@ export function CompareView({ data, accounts }: { data: Compare | null; accounts
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="period" tickFormatter={(v: string) => fmtDate(v).slice(0, 5)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} minTickGap={24} />
+                  <XAxis
+                    dataKey="period"
+                    tickFormatter={(v: string) => fmtDate(v).slice(0, 5)}
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                    axisLine={false}
+                    tickLine={false}
+                    minTickGap={24}
+                  />
                   <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} width={48} />
                   <Tooltip
                     content={({ active, payload, label }) =>
                       active && payload?.length ? (
                         <div className="rounded-md border bg-card px-3 py-2 text-xs shadow-md">
                           <p className="font-medium">{fmtDate(String(label))}</p>
-                          {[...payload].sort((a, b) => Number(b.value) - Number(a.value)).map((p) => (
-                            <p key={String(p.dataKey)} className="flex items-center gap-2">
-                              <span className="inline-block h-0.5 w-3" style={{ background: p.color }} /> {String(p.dataKey)}: <b className="tabular-nums">{fmtNumber(Number(p.value))}</b>
-                            </p>
-                          ))}
+                          {[...payload]
+                            .sort((a, b) => Number(b.value) - Number(a.value))
+                            .map((p) => (
+                              <p key={String(p.dataKey)} className="flex items-center gap-2">
+                                <span className="inline-block h-0.5 w-3" style={{ background: p.color }} /> {String(p.dataKey)}:{" "}
+                                <b className="tabular-nums">{fmtNumber(Number(p.value))}</b>
+                              </p>
+                            ))}
                         </div>
                       ) : null
                     }
@@ -127,7 +144,14 @@ export function CompareView({ data, accounts }: { data: Compare | null; accounts
                         <span className="mr-2 inline-block size-2.5 rounded-full align-middle" style={{ background: color(it.code) }} />
                         {it.code} <span className="text-xs text-muted-foreground">{it.name !== it.code ? it.name : ""}</span>
                       </td>
-                      {[it.metrics.new_links, it.metrics.active_links, it.metrics.clicks, it.metrics.unique_clicks, it.metrics.bot_clicks, it.metrics.suspicious_clicks].map((v, i) => (
+                      {[
+                        it.metrics.new_links,
+                        it.metrics.active_links,
+                        it.metrics.clicks,
+                        it.metrics.unique_clicks,
+                        it.metrics.bot_clicks,
+                        it.metrics.suspicious_clicks,
+                      ].map((v, i) => (
                         <td key={i} className="py-1.5 text-right tabular-nums">
                           {fmtNumber(v)}
                         </td>

@@ -15,7 +15,13 @@ export function Pager({ total, page, pageSize }: { total: number; page: number; 
         {fmtNumber(total)} dòng · trang {Math.min(page, pages)}/{pages}
       </span>
       <div className="flex gap-1">
-        <Button variant="outline" size="sm" disabled={page <= 1 || pending} onClick={() => void setPage(page - 1 <= 1 ? null : page - 1)} aria-label="Trang trước">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1 || pending}
+          onClick={() => void setPage(page - 1 <= 1 ? null : page - 1)}
+          aria-label="Trang trước"
+        >
           <ChevronLeft />
         </Button>
         <Button variant="outline" size="sm" disabled={page >= pages || pending} onClick={() => void setPage(page + 1)} aria-label="Trang sau">

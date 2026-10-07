@@ -18,6 +18,7 @@ tags:
   - name: me
   - name: filters
   - name: reports
+  - name: exports
   - name: saved-reports
   - name: params
   - name: explorer
@@ -725,6 +726,134 @@ paths:
               schema: { $ref: '#/components/schemas/SavedReport' }
         '401': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/traffic-quality:
+    get:
+      tags: [reports]
+      operationId: getTrafficQuality
+      summary: R7 — Chất lượng traffic & chống gian lận (admin, ≤ 3 tháng)
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TrafficQuality' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/exports:
+    get:
+      tags: [exports]
+      operationId: listExports
+      summary: R8 — Job xuất dữ liệu của tôi (admin thấy tất cả)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportJobList' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [exports]
+      operationId: createExport
+      summary: R8 — Tạo job xuất CSV / XLSX (chạy nền, file giữ 7 ngày, ≤ 1 triệu dòng)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportRequest' }
+      responses:
+        '202':
+          description: Đã nhận job
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportJob' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /v1/exports/{id}:
+    get:
+      tags: [exports]
+      operationId: getExport
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportJob' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/exports/{id}/download:
+    get:
+      tags: [exports]
+      operationId: downloadExport
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      responses:
+        '200':
+          description: File CSV / XLSX
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '410': { $ref: '#/components/responses/Problem' }
+
+  /v1/param-registry:
+    get:
+      tags: [params]
+      operationId: listParamRegistry
+      summary: §4.1 c3 — Tham số đã xuất hiện trên link + trạng thái theo dõi (admin)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ParamRegistryList' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/param-registry/{key}:
+    patch:
+      tags: [params]
+      operationId: updateParamRegistry
+      summary: §4.1 c3 — Bật / tắt theo dõi, nhãn, PII, ngưỡng (admin). Bật mới → Service chạy backfill.
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema: { type: string, maxLength: 64, pattern: '^[A-Za-z0-9_.\-]+$' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ParamRegistryUpdate' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ParamRegistryItem' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
 
 components:
   securitySchemes:
@@ -1548,3 +1677,138 @@ components:
       required: [items]
       properties:
         items: { type: array, items: { $ref: '#/components/schemas/SavedReport' } }
+
+    IPStat:
+      type: object
+      required: [ip, clicks, bot_clicks, suspicious_clicks, links, accounts]
+      properties:
+        ip: { type: string }
+        clicks: { type: integer, format: int64 }
+        bot_clicks: { type: integer, format: int64 }
+        suspicious_clicks: { type: integer, format: int64 }
+        links: { type: integer, format: int64 }
+        accounts: { type: integer, format: int64 }
+        country: { type: string }
+        last_seen: { type: string, format: date-time }
+
+    RepeatRow:
+      type: object
+      required: [key, label, clicks, unique_clicks, repeat_rate, suspicious_clicks]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        clicks: { type: integer, format: int64 }
+        unique_clicks: { type: integer, format: int64 }
+        repeat_rate: { type: number, format: double, description: '1 - unique / clicks' }
+        suspicious_clicks: { type: integer, format: int64 }
+
+    SourceBotRow:
+      type: object
+      required: [source_group, total, bot_clicks, bot_rate]
+      properties:
+        source_group: { type: string }
+        total: { type: integer, format: int64 }
+        bot_clicks: { type: integer, format: int64 }
+        bot_rate: { type: number, format: double }
+
+    FlaggedClick:
+      allOf:
+        - $ref: '#/components/schemas/ClickRow'
+        - type: object
+          required: [reasons]
+          properties:
+            reasons: { type: array, items: { type: string } }
+
+    TrafficQuality:
+      type: object
+      required: [period, totals, top_ips, repeat_by_ctv, repeat_by_campaign, bot_by_source, flagged]
+      properties:
+        period: { $ref: '#/components/schemas/Period' }
+        totals:
+          type: object
+          required: [clicks, bot_clicks, suspicious_clicks, repeat_clicks]
+          properties:
+            clicks: { type: integer, format: int64 }
+            bot_clicks: { type: integer, format: int64 }
+            suspicious_clicks: { type: integer, format: int64 }
+            repeat_clicks: { type: integer, format: int64 }
+        top_ips: { type: array, items: { $ref: '#/components/schemas/IPStat' } }
+        repeat_by_ctv: { type: array, items: { $ref: '#/components/schemas/RepeatRow' } }
+        repeat_by_campaign: { type: array, items: { $ref: '#/components/schemas/RepeatRow' } }
+        bot_by_source: { type: array, items: { $ref: '#/components/schemas/SourceBotRow' } }
+        flagged: { type: array, items: { $ref: '#/components/schemas/FlaggedClick' } }
+
+    ExportRequest:
+      type: object
+      required: [kind, format, params]
+      properties:
+        kind: { type: string, enum: [accounts, campaigns, ctvs, links_top, clicks, explorer] }
+        format: { type: string, enum: [csv, xlsx] }
+        name: { type: string, maxLength: 120 }
+        params:
+          type: object
+          additionalProperties: true
+          description: |
+            Tham số như màn hình nguồn: from, to, account, campaign, ctv, prefix, compare (+ mode, dead_days cho links_top;
+            filters cho clicks; nguyên ExplorerQuery cho explorer)
+
+    ExportJob:
+      type: object
+      required: [id, kind, format, status, name, created_by, created_at, expires_at]
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        format: { type: string }
+        name: { type: string }
+        status: { type: string, enum: [queued, running, done, failed, expired] }
+        rows: { type: integer, format: int64 }
+        size_bytes: { type: integer, format: int64 }
+        error: { type: string }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+
+    ExportJobList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ExportJob' } }
+
+    ParamRegistryItem:
+      type: object
+      required: [key, label, tracked, pii, status, links, values]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        tracked: { type: boolean }
+        pii: { type: string, enum: [none, hash, drop] }
+        max_values: { type: integer }
+        status: { type: string, enum: [active, high_cardinality, disabled] }
+        in_registry: { type: boolean, description: 'false = mới thấy trên link, chưa đăng ký' }
+        links: { type: integer, format: int64, description: 'Số link mang tham số' }
+        values: { type: integer, format: int64, description: 'Số giá trị khác nhau (tối đa 10.000)' }
+        samples: { type: array, items: { type: string }, description: 'Ví dụ giá trị (ẩn với PII)' }
+        backfill:
+          type: object
+          properties:
+            status: { type: string }
+            progress: { type: number, format: double }
+            from: { type: string, format: date }
+            error: { type: string }
+        updated_by: { type: string }
+        updated_at: { type: string, format: date-time }
+
+    ParamRegistryList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ParamRegistryItem' } }
+
+    ParamRegistryUpdate:
+      type: object
+      properties:
+        tracked: { type: boolean }
+        label: { type: string, maxLength: 80 }
+        pii: { type: string, enum: [none, hash, drop] }
+        max_values: { type: integer, minimum: 10, maximum: 1000000 }

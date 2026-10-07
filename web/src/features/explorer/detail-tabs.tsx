@@ -9,7 +9,7 @@ const TABS = ["report", "clicks"] as const;
  * Tab trong màn hình chi tiết (tài khoản / chiến dịch / CTV / link): "Báo cáo" và "Lượt click".
  * Tab "Lượt click" khoá sẵn bộ lọc theo đối tượng đang xem (§4.1).
  */
-export function DetailTabs({ children, clicks }: { children: ReactNode; clicks: ReactNode; explorerLock?: Record<string, string[]> }) {
+export function DetailTabs({ children, clicks }: { children: ReactNode; clicks: ReactNode }) {
   const [tab, setTab] = useQueryState("tab", parseAsStringLiteral(TABS).withDefault("report"));
   return (
     <div className="space-y-4">
@@ -21,7 +21,10 @@ export function DetailTabs({ children, clicks }: { children: ReactNode; clicks: 
             role="tab"
             aria-selected={tab === t}
             onClick={() => void setTab(t === "report" ? null : t)}
-            className={cn("-mb-px border-b-2 px-3 py-2 text-sm", tab === t ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}
+            className={cn(
+              "-mb-px border-b-2 px-3 py-2 text-sm",
+              tab === t ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
           >
             {t === "report" ? "Báo cáo" : "Lượt click"}
           </button>

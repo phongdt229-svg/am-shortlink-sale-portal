@@ -1,6 +1,15 @@
 import { encodeState, type ExplorerState } from "./state";
 
-export type Globals = { from: string; to: string; account?: string[]; campaign?: string[]; ctv?: string[]; prefix?: string[]; compare?: boolean; granularity?: string };
+export type Globals = {
+  from: string;
+  to: string;
+  account?: string[];
+  campaign?: string[];
+  ctv?: string[];
+  prefix?: string[];
+  compare?: boolean;
+  granularity?: string;
+};
 
 /** Dựng URL Explorer từ trạng thái đã lưu (bộ lọc chung + `ex`). Kỳ lưu dạng tuỳ chọn để mở lại đúng khoảng ngày. */
 export function savedHref(query: Record<string, unknown>): string {
@@ -17,4 +26,3 @@ export function savedHref(query: Record<string, unknown>): string {
   if (st) p.set("ex", encodeState(st));
   return `/clicks/explore?${p.toString()}`;
 }
-

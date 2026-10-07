@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/report/page-header";
 import { AccountsTable } from "@/features/accounts/accounts-table";
+import { ExportButton } from "@/features/exports/export-button";
 import { data, serverApi } from "@/lib/api/server";
 import { pageContext, type SearchParams } from "@/lib/filters/page";
 
@@ -16,7 +17,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Sea
   );
   return (
     <div className="space-y-4">
-      <PageHeader title="Báo cáo theo tài khoản" subtitle="Bấm vào tài khoản để xem chi tiết" />
+      <PageHeader title="Báo cáo theo tài khoản" subtitle="Bấm vào tài khoản để xem chi tiết" actions={<ExportButton kind="accounts" />} />
       <AccountsTable page={page} compare={filters.compare} />
     </div>
   );

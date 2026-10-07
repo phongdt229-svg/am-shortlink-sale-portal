@@ -45,7 +45,9 @@ export function CTVRanking({ rows }: { rows: Row[] }) {
               <td className="py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.active_links)}</td>
               <td className="py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.clicks)}</td>
               <td className="py-1.5 text-right tabular-nums">{fmtNumber(r.metrics.unique_clicks)}</td>
-              <td className={`py-1.5 text-right tabular-nums ${r.metrics.suspicious_clicks > 0 ? "text-destructive" : ""}`}>{fmtNumber(r.metrics.suspicious_clicks)}</td>
+              <td className={`py-1.5 text-right tabular-nums ${r.metrics.suspicious_clicks > 0 ? "text-destructive" : ""}`}>
+                {fmtNumber(r.metrics.suspicious_clicks)}
+              </td>
             </tr>
           ))}
         </tbody>

@@ -32,8 +32,9 @@ type Config struct {
 	ShortURLBase string `envconfig:"SHORT_URL_BASE" default:"http://localhost"`
 
 	// Export
-	ExportDir string        `envconfig:"EXPORT_DIR" default:"./var/exports"`
-	ExportTTL time.Duration `envconfig:"EXPORT_TTL" default:"168h"`
+	ExportDir    string        `envconfig:"EXPORT_DIR" default:"./var/exports"`
+	ExportWorker bool          `envconfig:"EXPORT_WORKER" default:"true"` // false = pod chỉ phục vụ API (worker chạy deployment riêng)
+	ExportTTL    time.Duration `envconfig:"EXPORT_TTL" default:"168h"`
 }
 
 type Mongo struct {

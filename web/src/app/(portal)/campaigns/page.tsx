@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/report/page-header";
 import { Button } from "@/components/ui/button";
 import { CampaignsTable } from "@/features/campaigns/campaigns-table";
+import { ExportButton } from "@/features/exports/export-button";
 import { data, serverApi } from "@/lib/api/server";
 import { pageContext, type SearchParams } from "@/lib/filters/page";
 
@@ -14,7 +15,17 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Se
   const api = await serverApi();
   const page = data(
     await api.GET("/v1/reports/campaigns", {
-      params: { query: { ...query, granularity: undefined, page: table.page, page_size: 50, sort: table.sort, order: table.order, q: table.q } },
+      params: {
+        query: {
+          ...query,
+          granularity: undefined,
+          page: table.page,
+          page_size: 50,
+          sort: table.sort,
+          order: table.order,
+          q: table.q,
+        },
+      },
     }),
   );
   return (
@@ -22,11 +33,14 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Se
       <PageHeader
         title="Báo cáo theo chiến dịch"
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/campaigns/compare${search}`}>
-              <GitCompare /> So sánh chiến dịch
-            </Link>
-          </Button>
+          <>
+            <ExportButton kind="campaigns" />
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/campaigns/compare${search}`}>
+                <GitCompare /> So sánh chiến dịch
+              </Link>
+            </Button>
+          </>
         }
       />
       <CampaignsTable page={page} compare={filters.compare} />

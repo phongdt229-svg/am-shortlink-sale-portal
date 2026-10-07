@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"am-shortlink-portal/api/internal/auth"
 	"am-shortlink-portal/api/internal/cache"
 	"am-shortlink-portal/api/internal/config"
+	"am-shortlink-portal/api/internal/export"
 	"am-shortlink-portal/api/internal/httpapi"
 	"am-shortlink-portal/api/internal/httpapi/handler"
 	"am-shortlink-portal/api/internal/mask"
@@ -91,8 +93,20 @@ func run() error {
 	})
 	masker := mask.NewMasker(cfg.PIIHashSalt)
 	auditLog := audit.New(st)
-	h := &handler.Handler{Auth: authSvc, Store: st, Masker: masker, Reports: report.NewService(st, masker).WithCache(reportCache, cfg.Redis.ReportTTL, cfg.Redis.ReportTTLPast).WithShortURLBase(cfg.ShortURLBase),
-		Saved: savedreport.New(st, auditLog), Audit: auditLog}
+	reports := report.NewService(st, masker).
+		WithCache(reportCache, cfg.Redis.ReportTTL, cfg.Redis.ReportTTLPast).
+		WithShortURLBase(cfg.ShortURLBase).
+		WithAudit(auditLog)
+	exports := export.New(st, reports, cfg.ExportDir, cfg.ExportTTL, auditLog)
+	h := &handler.Handler{
+		Auth: authSvc, Store: st, Masker: masker, Reports: reports,
+		Saved: savedreport.New(st, auditLog), Exports: exports, Audit: auditLog,
+	}
+	if cfg.ExportWorker {
+		host, _ := os.Hostname()
+		go exports.RunWorker(ctx, fmt.Sprintf("%s-%d", host, os.Getpid()))
+		log.Info("export worker started", "dir", cfg.ExportDir, "ttl", cfg.ExportTTL)
+	}
 
 	router, err := httpapi.NewRouter(httpapi.Deps{
 		Handler:         h,

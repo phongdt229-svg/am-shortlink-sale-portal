@@ -53,7 +53,9 @@ export function Heatmap({ cells }: { cells: Cell[] }) {
         </table>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span aria-live="polite">{hover ? `${WEEKDAYS_VN[hover.weekday]} ${hover.hour}:00–${hover.hour}:59 · ${fmtNumber(hover.clicks)} click` : "Rê chuột lên ô để xem số"}</span>
+        <span aria-live="polite">
+          {hover ? `${WEEKDAYS_VN[hover.weekday]} ${hover.hour}:00–${hover.hour}:59 · ${fmtNumber(hover.clicks)} click` : "Rê chuột lên ô để xem số"}
+        </span>
         <span className="flex items-center gap-1">
           Ít
           {RAMP.map((c) => (

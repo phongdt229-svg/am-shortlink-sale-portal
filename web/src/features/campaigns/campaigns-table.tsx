@@ -26,15 +26,37 @@ function useColumns(compare: boolean): ColumnDef<Row, unknown>[] {
       meta: { sortKey: "code" },
     },
     { id: "new_links", header: "Link mới", cell: ({ row }) => fmtNumber(row.original.metrics.new_links), meta: { align: "right", sortKey: "new_links" } },
-    { id: "active_links", header: "Link có click", cell: ({ row }) => fmtNumber(row.original.metrics.active_links), meta: { align: "right", sortKey: "active_links" } },
+    {
+      id: "active_links",
+      header: "Link có click",
+      cell: ({ row }) => fmtNumber(row.original.metrics.active_links),
+      meta: { align: "right", sortKey: "active_links" },
+    },
     { id: "clicks", header: "Lượt click", cell: ({ row }) => fmtNumber(row.original.metrics.clicks), meta: { align: "right", sortKey: "clicks" } },
-    { id: "unique_clicks", header: "Khách", cell: ({ row }) => fmtNumber(row.original.metrics.unique_clicks), meta: { align: "right", sortKey: "unique_clicks" } },
-    { id: "suspicious", header: "Nghi vấn", cell: ({ row }) => fmtNumber(row.original.metrics.suspicious_clicks), meta: { align: "right", sortKey: "suspicious_clicks" } },
+    {
+      id: "unique_clicks",
+      header: "Khách",
+      cell: ({ row }) => fmtNumber(row.original.metrics.unique_clicks),
+      meta: { align: "right", sortKey: "unique_clicks" },
+    },
+    {
+      id: "suspicious",
+      header: "Nghi vấn",
+      cell: ({ row }) => fmtNumber(row.original.metrics.suspicious_clicks),
+      meta: { align: "right", sortKey: "suspicious_clicks" },
+    },
     { id: "ctv_count", header: "Số CTV", cell: ({ row }) => fmtNumber(row.original.ctv_count), meta: { align: "right", sortKey: "ctv_count" } },
     { id: "first_date", header: "Bắt đầu", cell: ({ row }) => fmtDate(row.original.first_date), meta: { align: "right" } },
     { id: "last_click", header: "Click cuối", cell: ({ row }) => fmtDate(row.original.last_click_date), meta: { align: "right" } },
     ...(compare
-      ? [{ id: "change", header: "So kỳ trước", cell: ({ row }) => <DeltaCell value={row.original.change_clicks} />, meta: { align: "right", sortKey: "change_clicks" } } satisfies ColumnDef<Row, unknown>]
+      ? [
+          {
+            id: "change",
+            header: "So kỳ trước",
+            cell: ({ row }) => <DeltaCell value={row.original.change_clicks} />,
+            meta: { align: "right", sortKey: "change_clicks" },
+          } satisfies ColumnDef<Row, unknown>,
+        ]
       : []),
   ];
 }
@@ -42,7 +64,14 @@ function useColumns(compare: boolean): ColumnDef<Row, unknown>[] {
 export function CampaignsTable({ page, compare }: { page: Page; compare: boolean }) {
   const columns = useColumns(compare);
   return (
-    <DataTable columns={columns} data={page.items} total={page.total} pageSize={50} rowKey={(r) => r.code || "-"} searchPlaceholder="Tìm mã / tên chiến dịch…" />
+    <DataTable
+      columns={columns}
+      data={page.items}
+      total={page.total}
+      pageSize={50}
+      rowKey={(r) => r.code || "-"}
+      searchPlaceholder="Tìm mã / tên chiến dịch…"
+    />
   );
 }
 
