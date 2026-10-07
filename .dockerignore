@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/.env
+**/.env.local
+api/bin
+api/var
+api/var.log
+web.log
+.git
+docs

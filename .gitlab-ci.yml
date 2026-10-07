@@ -1,0 +1,65 @@
+# CI Portal: 2 image độc lập, job chạy theo thư mục thay đổi.
+# Khi tích hợp template gitflow ISC: include `isc/cicd-config/ci-template/gitflow` và giữ các job lint/test dưới đây.
+stages: [lint, test, build]
+
+.api-rules: &api-rules
+  rules:
+    - changes: [api/**/*, openapi/**/*]
+
+.web-rules: &web-rules
+  rules:
+    - changes: [web/**/*, openapi/**/*]
+
+api:lint:
+  <<: *api-rules
+  stage: lint
+  image: golang:1.26
+  script:
+    - cd api
+    - go vet ./...
+    - go tool oapi-codegen -config oapi-codegen.yaml ../openapi/portal-api.yaml
+    - git diff --exit-code -- internal/httpapi/gen # code sinh phải khớp spec
+
+api:test:
+  <<: *api-rules
+  stage: test
+  image: golang:1.26
+  services:
+    - name: mongo:8.0
+      alias: mongo
+  variables:
+    MONGODB_TEST_URI: mongodb://mongo:27017
+  script:
+    - cd api && go test -race -tags=integration -coverprofile=coverage.out ./...
+
+web:lint:
+  <<: *web-rules
+  stage: lint
+  image: node:22-alpine
+  script:
+    - corepack enable && cd web && pnpm install --frozen-lockfile
+    - pnpm gen:api && git diff --exit-code -- src/lib/api/schema.d.ts # client sinh phải khớp spec
+    - pnpm lint && pnpm typecheck
+
+web:test:
+  <<: *web-rules
+  stage: test
+  image: node:22-alpine
+  script:
+    - corepack enable && cd web && pnpm install --frozen-lockfile && pnpm test
+
+.build: &build
+  stage: build
+  image: docker:27
+  services: [docker:27-dind]
+  script:
+    - docker build -f $APP/Dockerfile --build-arg VERSION=$CI_COMMIT_SHORT_SHA -t $HARBOR_REGISTRY/am-shortlink/portal-$APP:$CI_COMMIT_SHORT_SHA .
+    - docker push $HARBOR_REGISTRY/am-shortlink/portal-$APP:$CI_COMMIT_SHORT_SHA
+
+api:build:
+  <<: [*api-rules, *build]
+  variables: { APP: api }
+
+web:build:
+  <<: [*web-rules, *build]
+  variables: { APP: web }

@@ -1,0 +1,23 @@
+image:
+  repository: harbor.example/am-shortlink/portal-web # TODO: đường dẫn Harbor thật
+  tag: latest
+  pullPolicy: IfNotPresent
+replicaCount: 2
+host: portal-dev.example.vn # P-D3
+env:
+  APP_ENV: dev
+  PORTAL_API_URL: http://portal-api:8080
+  SESSION_IDLE_HOURS: "8"
+  OTEL_ENABLED: "true"
+  OTEL_SERVICE_NAMESPACE: am-shortlink
+  OTEL_SERVICE_NAME: am-shortlink-portal-web
+  OTEL_ENDPOINT_TRACES: http://otel-collector.fpt.net/v1/traces
+  OTEL_SAMPLER: always
+# PORTAL_SESSION_SECRET: Secret K8s do Vault đồng bộ (không đặt trong values).
+sessionSecretRef:
+  name: portal-web-secrets
+  key: PORTAL_SESSION_SECRET
+podAnnotations: {}
+resources:
+  requests: { cpu: 100m, memory: 192Mi }
+  limits: { cpu: "1", memory: 512Mi }

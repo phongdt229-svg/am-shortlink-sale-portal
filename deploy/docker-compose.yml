@@ -1,0 +1,84 @@
+# Môi trường local đầy đủ: MongoDB (replica set 1 node), Redis (cache), portal-api, portal-web, OTel Collector, Jaeger.
+#   docker compose -f deploy/docker-compose.yml up -d --build
+#   docker compose -f deploy/docker-compose.yml run --rm seed      # sinh dữ liệu giả lập (lần đầu)
+# Portal: http://localhost:3000 · API: http://localhost:8080 · Jaeger: http://localhost:16686
+name: am-shortlink-portal
+
+x-api-env: &api-env
+  APP_ENV: local
+  MONGODB_URI: mongodb://mongo:27017/?replicaSet=rs0
+  MONGODB_READ_PREFERENCE: secondaryPreferred
+  PORTAL_JWT_SIGNING_KEY: local-dev-jwt-signing-key-change-me-0123456789
+  PII_HASH_SALT: local-dev-pii-salt-0123456789
+  REDIS_ADDR: redis:6379
+  OTEL_ENABLED: "true"
+  OTEL_ENDPOINT_TRACES: http://otel-collector:4318/v1/traces
+  EXPORT_DIR: /data/exports
+
+services:
+  mongo:
+    image: mongo:8.0
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27018:27017"]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      # Khởi tạo replica set lần đầu (cần cho change stream / readPreference như production).
+      test: mongosh --quiet --eval "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok }"
+      interval: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["6380:6379"]
+
+  migrate:
+    build: { context: .., dockerfile: api/Dockerfile }
+    entrypoint: ["/app/migrate"]
+    environment: *api-env
+    depends_on: { mongo: { condition: service_healthy } }
+
+  seed:
+    build: { context: .., dockerfile: api/Dockerfile }
+    entrypoint: ["/app/seed", "-reset"]
+    environment: *api-env
+    depends_on: { mongo: { condition: service_healthy } }
+    profiles: [tools]
+
+  portal-api:
+    build: { context: .., dockerfile: api/Dockerfile }
+    environment: *api-env
+    ports: ["8080:8080"]
+    volumes: [exports:/data/exports]
+    depends_on:
+      mongo: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_started }
+
+  portal-web:
+    build: { context: .., dockerfile: web/Dockerfile }
+    environment:
+      APP_ENV: local
+      PORTAL_API_URL: http://portal-api:8080
+      PORTAL_SESSION_SECRET: local-dev-session-secret-change-me-0123456789
+      COOKIE_SECURE: "false"
+      OTEL_ENABLED: "true"
+      OTEL_ENDPOINT_TRACES: http://otel-collector:4318/v1/traces
+    ports: ["3000:3000"]
+    depends_on: [portal-api]
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes: [./otel/collector.yaml:/etc/otel/config.yaml:ro]
+    ports: ["4318:4318"]
+    depends_on: [jaeger]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    environment: { COLLECTOR_OTLP_ENABLED: "true" }
+    ports: ["16686:16686"]
+
+volumes:
+  mongo-data:
+  exports:

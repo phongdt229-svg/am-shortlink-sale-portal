@@ -1,0 +1,1550 @@
+# Hợp đồng portal-web ↔ portal-api — NGUỒN SỰ THẬT.
+# Sinh code: Go (oapi-codegen, api/internal/httpapi/gen) + TypeScript (openapi-typescript, web/src/lib/api/schema.d.ts).
+# Ghi chú: dùng OpenAPI 3.0.3 vì oapi-codegen v2 chưa hỗ trợ đầy đủ 3.1 (xem docs/PLAN_PORTAL_REPORT.md §3).
+openapi: 3.0.3
+info:
+  title: am-shortlink portal-api
+  version: 0.1.0
+  description: |
+    API nội bộ của Portal báo cáo shortlink. Chỉ `portal-web` (BFF) gọi; không public ra Internet.
+    Mọi số liệu tính theo định nghĩa chỉ số `docs/PLAN_SERVICE_API.md` §5.2, ngày theo Asia/Ho_Chi_Minh.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+  - name: me
+  - name: filters
+  - name: reports
+  - name: saved-reports
+  - name: params
+  - name: explorer
+
+paths:
+  /v1/auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Đăng nhập bằng tài khoản `users` (bcrypt)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '423': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /v1/auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refreshToken
+      summary: Đổi refresh token lấy cặp token mới (xoay vòng refresh token)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: Cặp token mới
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Thu hồi refresh token (cả chuỗi xoay vòng)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '204': { description: Đã đăng xuất }
+        '400': { $ref: '#/components/responses/Problem' }
+
+  /v1/me:
+    get:
+      tags: [me]
+      operationId: getMe
+      summary: Người dùng hiện tại + phạm vi dữ liệu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/filters/accounts:
+    get:
+      tags: [filters]
+      operationId: listFilterAccounts
+      summary: Tài khoản trong phạm vi người dùng (cho bộ lọc)
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountOptionList' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/filters/campaigns:
+    get:
+      tags: [filters]
+      operationId: listFilterCampaigns
+      summary: Chiến dịch có link thuộc phạm vi người dùng
+      parameters:
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Account'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignOptionList' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/filters/prefixes:
+    get:
+      tags: [filters]
+      operationId: listFilterPrefixes
+      summary: Danh sách prefix (`sale`, `lm`, …)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PrefixOptionList' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/overview:
+    get:
+      tags: [reports]
+      operationId: getOverview
+      summary: R1 — Tổng quan (KPI, timeline, top, phân rã, heatmap) theo phạm vi
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OverviewReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/accounts:
+    get:
+      tags: [reports]
+      operationId: listAccountReports
+      summary: R2 — Danh sách tài khoản kèm chỉ số
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountRowPage' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/accounts/{username}:
+    get:
+      tags: [reports]
+      operationId: getAccountReport
+      summary: R2 — Chi tiết tài khoản
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string, maxLength: 200 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/campaigns:
+    get:
+      tags: [reports]
+      operationId: listCampaignReports
+      summary: R3 — Danh sách chiến dịch kèm chỉ số
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignRowPage' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/campaigns/compare:
+    get:
+      tags: [reports]
+      operationId: compareCampaigns
+      summary: R3 — So sánh 2–5 chiến dịch
+      parameters:
+        - name: codes
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: array
+            minItems: 2
+            maxItems: 5
+            items: { type: string, maxLength: 64 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignCompare' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/campaigns/{code}:
+    get:
+      tags: [reports]
+      operationId: getCampaignReport
+      summary: R3 — Chi tiết chiến dịch
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Mã chiến dịch; `-` = link không gắn chiến dịch
+          schema: { type: string, maxLength: 200 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/ctvs:
+    get:
+      tags: [reports]
+      operationId: listCtvReports
+      summary: R4 — Bảng xếp hạng CTV (không gồm "chưa định danh")
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CTVRankPage' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/ctvs/lookup:
+    get:
+      tags: [reports]
+      operationId: lookupCtv
+      summary: R4 — Tra cứu CTV theo SĐT (mọi định dạng) / hash — khớp chính xác qua index ctv_id
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 3, maxLength: 64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CTVLookup' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/ctvs/unidentified:
+    get:
+      tags: [reports]
+      operationId: getUnidentifiedCtv
+      summary: R4 — Link / click chưa định danh CTV (admin, chính chủ)
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UnidentifiedReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/ctvs/{ref}:
+    get:
+      tags: [reports]
+      operationId: getCtvReport
+      summary: R4 — Chi tiết CTV (ref = ctv_ref mờ, không phải SĐT)
+      parameters:
+        - name: ref
+          in: path
+          required: true
+          schema: { type: string, maxLength: 200 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Prefix'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CTVReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/links/top:
+    get:
+      tags: [reports]
+      operationId: listTopLinks
+      summary: R5 — Top link theo click / tăng trưởng; link "chết" (không click N ngày)
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - name: mode
+          in: query
+          schema: { type: string, enum: [clicks, growth, dead], default: clicks }
+        - name: dead_days
+          in: query
+          description: Với mode=dead — số ngày gần nhất không có click (tính đến `to`)
+          schema: { type: integer, minimum: 1, maximum: 180, default: 14 }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LinkRowPage' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/links/{code}:
+    get:
+      tags: [reports]
+      operationId: getLinkReport
+      summary: R5 — Chi tiết link (KPI, timeline, phân rã, 100 click gần nhất)
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string, maxLength: 100 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LinkReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/links/{code}/qrcode:
+    get:
+      tags: [reports]
+      operationId: getLinkQrcode
+      summary: Mã QR của short URL (PNG)
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string, maxLength: 100 }
+        - name: size
+          in: query
+          schema: { type: integer, minimum: 128, maximum: 1024, default: 256 }
+      responses:
+        '200':
+          description: PNG
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/clicks:
+    get:
+      tags: [reports]
+      operationId: listClicks
+      summary: R6 — Nhật ký click thô (≤ 3 tháng), phân trang con trỏ; IP che theo vai trò
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Ctv'
+        - $ref: '#/components/parameters/Prefix'
+        - name: filters
+          in: query
+          description: Tiêu chí lọc chi tiết (JSON ClickFilters) — dùng cho drill-down từ Click Explorer
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClickFilters' }
+        - name: cursor
+          in: query
+          schema: { type: string, maxLength: 200 }
+        - name: page_size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClickPage' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/clicks/query:
+    post:
+      tags: [explorer]
+      operationId: queryClicks
+      summary: R6b — Click Explorer — lọc nhiều tiêu chí, nhóm theo 1–3 chiều, top N + "khác", so kỳ trước
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExplorerQuery' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExplorerResult' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '504': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/clicks/facets:
+    get:
+      tags: [explorer]
+      operationId: getClickFacets
+      summary: R6b — Giá trị cho bộ lọc (theo phạm vi); field=param.<key> cho tham số URL
+      parameters:
+        - name: field
+          in: query
+          required: true
+          schema: { type: string, maxLength: 80 }
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FacetList' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/params:
+    get:
+      tags: [params]
+      operationId: listParamReports
+      summary: §4.1 c2 — Tham số URL đang theo dõi kèm số giá trị, số link, tổng click
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ParamSummaryList' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/reports/params/{key}:
+    get:
+      tags: [params]
+      operationId: getParamReport
+      summary: §4.1 c2 — Giá trị của một tham số + chỉ số, timeline top 5, cảnh báo dữ liệu
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema: { type: string, maxLength: 64 }
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/Account'
+        - $ref: '#/components/parameters/Campaign'
+        - $ref: '#/components/parameters/Compare'
+        - $ref: '#/components/parameters/Granularity'
+        - $ref: '#/components/parameters/Q'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ParamReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/saved-reports:
+    get:
+      tags: [saved-reports]
+      operationId: listSavedReports
+      summary: Báo cáo / bộ lọc đã lưu của tôi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReportList' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [saved-reports]
+      operationId: createSavedReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SavedReportInput' }
+      responses:
+        '201':
+          description: Đã lưu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /v1/saved-reports/shared/{token}:
+    get:
+      tags: [saved-reports]
+      operationId: getSharedReport
+      summary: Mở báo cáo được chia sẻ — người nhận chỉ thấy dữ liệu thuộc phạm vi của mình khi chạy
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string, maxLength: 64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReport' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/saved-reports/{id}:
+    get:
+      tags: [saved-reports]
+      operationId: getSavedReport
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReport' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [saved-reports]
+      operationId: updateSavedReport
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SavedReportInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReport' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [saved-reports]
+      operationId: deleteSavedReport
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      responses:
+        '204': { description: Đã xoá }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /v1/saved-reports/{id}/share:
+    post:
+      tags: [saved-reports]
+      operationId: shareSavedReport
+      summary: Bật / tắt chia sẻ qua link
+      parameters:
+        - $ref: '#/components/parameters/SavedId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedReport' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Q:
+      name: q
+      in: query
+      description: Tìm theo chuỗi con (không phân biệt hoa thường)
+      schema: { type: string, maxLength: 100 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+    Account:
+      name: account
+      in: query
+      description: Lọc theo tài khoản (lặp lại tham số cho nhiều giá trị). Ngoài phạm vi → 403.
+      style: form
+      explode: true
+      schema:
+        type: array
+        maxItems: 100
+        items: { type: string, maxLength: 64 }
+
+    From:
+      name: from
+      in: query
+      required: true
+      description: Ngày bắt đầu (gồm), theo ngày lịch Asia/Ho_Chi_Minh
+      schema: { type: string, format: date }
+    To:
+      name: to
+      in: query
+      required: true
+      description: Ngày kết thúc (gồm trọn ngày). Số liệu tổng hợp tối đa 12 tháng.
+      schema: { type: string, format: date }
+    Campaign:
+      name: campaign
+      in: query
+      description: Mã chiến dịch (lặp lại cho nhiều giá trị; `-` = không gắn chiến dịch)
+      style: form
+      explode: true
+      schema:
+        type: array
+        maxItems: 100
+        items: { type: string, maxLength: 64 }
+    Ctv:
+      name: ctv
+      in: query
+      description: CTV — SĐT (mọi định dạng, tự chuẩn hoá), hash hoặc ctv_ref; `-` = chưa định danh
+      style: form
+      explode: true
+      schema:
+        type: array
+        maxItems: 100
+        items: { type: string, maxLength: 200 }
+    Prefix:
+      name: prefix
+      in: query
+      description: Prefix cấp cho link (`sale`, `lm`…)
+      style: form
+      explode: true
+      schema:
+        type: array
+        maxItems: 10
+        items: { type: string, maxLength: 32 }
+    Compare:
+      name: compare
+      in: query
+      description: So với kỳ trước liền kề (cùng số ngày)
+      schema: { type: boolean, default: false }
+    Granularity:
+      name: granularity
+      in: query
+      schema: { $ref: '#/components/schemas/Granularity' }
+    SavedId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, maxLength: 64 }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+    Sort:
+      name: sort
+      in: query
+      description: Trường sắp xếp (vd `clicks`, `unique_clicks`, `new_links`, `username`, `code`)
+      schema: { type: string, maxLength: 40 }
+    Order:
+      name: order
+      in: query
+      schema: { $ref: '#/components/schemas/SortOrder' }
+
+  responses:
+    Problem:
+      description: Lỗi (RFC 9457 problem+json)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, example: 'about:blank' }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code:
+          type: string
+          description: Mã lỗi máy đọc được (vd `invalid_credentials`, `account_locked`, `forbidden_scope`)
+        request_id: { type: string }
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              message: { type: string }
+
+    Role:
+      type: string
+      enum: [admin, user, viewer]
+
+    Granularity:
+      type: string
+      enum: [day, week, month]
+      default: day
+
+    SortOrder:
+      type: string
+      enum: [asc, desc]
+      default: desc
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 64 }
+        password: { type: string, minLength: 1, maxLength: 128 }
+
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token: { type: string, minLength: 20, maxLength: 200 }
+
+    TokenPair:
+      type: object
+      required: [access_token, access_expires_at, refresh_token, refresh_expires_at, user]
+      properties:
+        access_token: { type: string }
+        access_expires_at: { type: string, format: date-time }
+        refresh_token: { type: string }
+        refresh_expires_at: { type: string, format: date-time }
+        user: { $ref: '#/components/schemas/Me' }
+
+    Me:
+      type: object
+      required: [username, role, all_accounts, accounts]
+      properties:
+        username: { type: string }
+        email: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        all_accounts:
+          type: boolean
+          description: true = thấy toàn bộ tài khoản (admin)
+        accounts:
+          type: array
+          description: Tài khoản được xem khi `all_accounts = false`
+          items: { type: string }
+
+    AccountOption:
+      type: object
+      required: [username]
+      properties:
+        username: { type: string }
+
+    AccountOptionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AccountOption' }
+
+    CampaignOption:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string }
+        name: { type: string }
+
+    CampaignOptionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CampaignOption' }
+
+    PrefixOption:
+      type: object
+      required: [id, is_default]
+      properties:
+        id: { type: string }
+        is_default: { type: boolean }
+        description: { type: string }
+
+    PrefixOptionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PrefixOption' }
+
+    Metrics:
+      type: object
+      description: Chỉ số theo định nghĩa PLAN_SERVICE_API.md §5.2
+      required: [new_links, active_links, clicks, unique_clicks, bot_clicks, suspicious_clicks, ctr_per_link]
+      properties:
+        total_links: { type: integer, format: int64, description: 'Link chưa xoá tạo đến hết kỳ' }
+        new_links: { type: integer, format: int64 }
+        active_links: { type: integer, format: int64, description: 'Số link có ≥ 1 click (không tính bot) trong kỳ' }
+        clicks: { type: integer, format: int64, description: 'Lượt redirect thành công, không tính bot' }
+        unique_clicks: { type: integer, format: int64 }
+        bot_clicks: { type: integer, format: int64 }
+        suspicious_clicks: { type: integer, format: int64 }
+        ctr_per_link: { type: number, format: double, description: 'clicks / active_links' }
+
+    MetricChanges:
+      type: object
+      description: Tỉ lệ thay đổi so kỳ trước (0.25 = +25%); null khi kỳ trước = 0
+      properties:
+        total_links: { type: number, format: double, nullable: true }
+        new_links: { type: number, format: double, nullable: true }
+        active_links: { type: number, format: double, nullable: true }
+        clicks: { type: number, format: double, nullable: true }
+        unique_clicks: { type: number, format: double, nullable: true }
+        bot_clicks: { type: number, format: double, nullable: true }
+        suspicious_clicks: { type: number, format: double, nullable: true }
+        ctr_per_link: { type: number, format: double, nullable: true }
+
+    Period:
+      type: object
+      required: [from, to]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+
+    Kpis:
+      type: object
+      required: [period, current]
+      properties:
+        period: { $ref: '#/components/schemas/Period' }
+        current: { $ref: '#/components/schemas/Metrics' }
+        previous_period: { $ref: '#/components/schemas/Period' }
+        previous: { $ref: '#/components/schemas/Metrics' }
+        change: { $ref: '#/components/schemas/MetricChanges' }
+
+    SeriesPoint:
+      type: object
+      required: [period, clicks, unique_clicks, bot_clicks, new_links, active_links]
+      properties:
+        period: { type: string, format: date, description: 'Ngày đầu của bucket (ngày / thứ Hai của tuần / ngày 1 của tháng)' }
+        clicks: { type: integer, format: int64 }
+        unique_clicks: { type: integer, format: int64 }
+        bot_clicks: { type: integer, format: int64 }
+        new_links: { type: integer, format: int64 }
+        active_links: { type: integer, format: int64 }
+
+    Series:
+      type: object
+      required: [granularity, points]
+      properties:
+        granularity: { $ref: '#/components/schemas/Granularity' }
+        points:
+          type: array
+          items: { $ref: '#/components/schemas/SeriesPoint' }
+        previous:
+          type: array
+          description: Kỳ trước, cùng số bucket, căn theo thứ tự
+          items: { $ref: '#/components/schemas/SeriesPoint' }
+
+    BreakdownItem:
+      type: object
+      required: [key, clicks, share]
+      properties:
+        key: { type: string }
+        clicks: { type: integer, format: int64 }
+        share: { type: number, format: double, description: 'Tỉ trọng trên tổng click' }
+
+    Breakdowns:
+      type: object
+      required: [device, os, browser, source_group, referer, country, access_prefix]
+      properties:
+        device: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        os: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        browser: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        source_group: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        referer: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        country: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+        access_prefix: { type: array, items: { $ref: '#/components/schemas/BreakdownItem' } }
+
+    HeatmapCell:
+      type: object
+      required: [weekday, hour, clicks]
+      properties:
+        weekday: { type: integer, minimum: 0, maximum: 6, description: '0 = Chủ nhật' }
+        hour: { type: integer, minimum: 0, maximum: 23 }
+        clicks: { type: integer, format: int64 }
+
+    TopItem:
+      type: object
+      required: [key, label, clicks, unique_clicks]
+      properties:
+        key: { type: string, description: 'Khoá điều hướng (username / mã chiến dịch / ctv_ref / mã link)' }
+        label: { type: string }
+        clicks: { type: integer, format: int64 }
+        unique_clicks: { type: integer, format: int64 }
+        suspicious_clicks: { type: integer, format: int64 }
+        owner: { type: string }
+
+    ReportSummary:
+      type: object
+      required: [kpis, series, breakdowns, heatmap]
+      properties:
+        kpis: { $ref: '#/components/schemas/Kpis' }
+        series: { $ref: '#/components/schemas/Series' }
+        breakdowns: { $ref: '#/components/schemas/Breakdowns' }
+        heatmap:
+          type: array
+          items: { $ref: '#/components/schemas/HeatmapCell' }
+
+    OverviewReport:
+      type: object
+      required: [summary, top_accounts, top_campaigns, top_ctvs, top_links]
+      properties:
+        summary: { $ref: '#/components/schemas/ReportSummary' }
+        top_accounts: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+        top_campaigns: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+        top_ctvs: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+        top_links: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+
+    AccountRow:
+      type: object
+      required: [username, metrics]
+      properties:
+        username: { type: string }
+        metrics: { $ref: '#/components/schemas/Metrics' }
+        change_clicks: { type: number, format: double, nullable: true }
+
+    AccountRowPage:
+      type: object
+      required: [items, total, page, page_size, totals]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/AccountRow' } }
+        total: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+        totals: { $ref: '#/components/schemas/Metrics' }
+
+    CampaignRow:
+      type: object
+      required: [code, name, metrics, ctv_count]
+      properties:
+        code: { type: string, description: 'Rỗng = link không gắn chiến dịch' }
+        name: { type: string }
+        metrics: { $ref: '#/components/schemas/Metrics' }
+        ctv_count: { type: integer, format: int64, description: 'Số CTV có hoạt động (click hoặc link mới) trong kỳ' }
+        first_date: { type: string, format: date, description: 'Ngày đầu tiên có hoạt động trong kỳ' }
+        last_click_date: { type: string, format: date }
+        change_clicks: { type: number, format: double, nullable: true }
+
+    CampaignRowPage:
+      type: object
+      required: [items, total, page, page_size, totals]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/CampaignRow' } }
+        total: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+        totals: { $ref: '#/components/schemas/Metrics' }
+
+    CTVRankRow:
+      type: object
+      required: [ctv_ref, ctv_display, metrics, rank]
+      properties:
+        ctv_ref: { type: string, description: 'Mã tham chiếu mờ (dùng trên URL); rỗng = chưa định danh' }
+        ctv_display: { type: string, description: 'SĐT đã che (đủ với admin) / hash' }
+        name: { type: string }
+        rank: { type: integer }
+        metrics: { $ref: '#/components/schemas/Metrics' }
+
+    AccountReport:
+      type: object
+      required: [username, summary, campaigns, top_ctvs, top_links]
+      properties:
+        username: { type: string }
+        summary: { $ref: '#/components/schemas/ReportSummary' }
+        campaigns: { type: array, items: { $ref: '#/components/schemas/CampaignRow' } }
+        top_ctvs: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+        top_links: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+
+    CampaignReport:
+      type: object
+      required: [code, name, summary, ctv_ranking, top_links]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        summary: { $ref: '#/components/schemas/ReportSummary' }
+        ctv_ranking: { type: array, items: { $ref: '#/components/schemas/CTVRankRow' } }
+        top_links: { type: array, items: { $ref: '#/components/schemas/TopItem' } }
+
+    CampaignCompareItem:
+      type: object
+      required: [code, name, metrics, series]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        metrics: { $ref: '#/components/schemas/Metrics' }
+        series: { type: array, items: { $ref: '#/components/schemas/SeriesPoint' } }
+
+    CampaignCompare:
+      type: object
+      required: [period, granularity, items]
+      properties:
+        period: { $ref: '#/components/schemas/Period' }
+        granularity: { $ref: '#/components/schemas/Granularity' }
+        items: { type: array, items: { $ref: '#/components/schemas/CampaignCompareItem' } }
+
+    CTVRankPage:
+      type: object
+      required: [items, total, page, page_size, totals]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/CTVRankRow' } }
+        total: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+        totals: { $ref: '#/components/schemas/Metrics' }
+
+    CTVLookupItem:
+      type: object
+      required: [ctv_ref, ctv_display, owner, links, clicks_total, first_link_at, last_link_at]
+      properties:
+        ctv_ref: { type: string }
+        ctv_display: { type: string }
+        name: { type: string }
+        owner: { type: string }
+        links: { type: integer, format: int64 }
+        clicks_total: { type: integer, format: int64, description: 'Tổng click toàn thời gian (links.clicks)' }
+        first_link_at: { type: string, format: date-time }
+        last_link_at: { type: string, format: date-time }
+        sample_links:
+          type: array
+          items: { $ref: '#/components/schemas/LinkInfo' }
+
+    CTVLookup:
+      type: object
+      required: [query, normalized, items]
+      properties:
+        query: { type: string }
+        normalized: { type: string, description: 'Giá trị sau chuẩn hoá (SĐT về 0xxxxxxxxx) — đã che nếu không phải admin' }
+        items: { type: array, items: { $ref: '#/components/schemas/CTVLookupItem' } }
+
+    LinkInfo:
+      type: object
+      required: [code, short_url, long_url, owner, campaign_code, prefix, status, created_at, ctv_display, ctv_ref]
+      properties:
+        code: { type: string }
+        short_url: { type: string }
+        long_url: { type: string }
+        dest_host: { type: string }
+        owner: { type: string }
+        campaign_code: { type: string }
+        ctv_ref: { type: string }
+        ctv_display: { type: string }
+        prefix: { type: string }
+        status: { type: string, enum: [active, disabled, deleted] }
+        is_custom: { type: boolean }
+        api_version: { type: string }
+        created_at: { type: string, format: date-time }
+
+    LinkRow:
+      type: object
+      required: [link, clicks, unique_clicks]
+      properties:
+        link: { $ref: '#/components/schemas/LinkInfo' }
+        clicks: { type: integer, format: int64 }
+        unique_clicks: { type: integer, format: int64 }
+        suspicious_clicks: { type: integer, format: int64 }
+        previous_clicks: { type: integer, format: int64 }
+        growth: { type: number, format: double, nullable: true }
+        last_click_date: { type: string, format: date }
+
+    LinkRowPage:
+      type: object
+      required: [items, total, page, page_size]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/LinkRow' } }
+        total: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+
+    UnidentifiedReport:
+      type: object
+      required: [metrics, links]
+      properties:
+        metrics: { $ref: '#/components/schemas/Metrics' }
+        share_of_clicks: { type: number, format: double, description: 'Tỉ trọng click chưa định danh trên tổng click cùng phạm vi' }
+        links: { $ref: '#/components/schemas/LinkRowPage' }
+
+    CTVReport:
+      type: object
+      required: [ctv_ref, ctv_display, summary, campaigns, links, alerts]
+      properties:
+        ctv_ref: { type: string }
+        ctv_display: { type: string }
+        name: { type: string }
+        owners: { type: array, items: { type: string } }
+        summary: { $ref: '#/components/schemas/ReportSummary' }
+        campaigns: { type: array, items: { $ref: '#/components/schemas/CampaignRow' } }
+        links: { type: array, items: { $ref: '#/components/schemas/LinkRow' } }
+        alerts:
+          type: array
+          items: { $ref: '#/components/schemas/Alert' }
+
+    Alert:
+      type: object
+      required: [level, code, message]
+      properties:
+        level: { type: string, enum: [info, warning, critical] }
+        code: { type: string }
+        message: { type: string }
+
+    LinkReport:
+      type: object
+      required: [link, summary, recent_clicks]
+      properties:
+        link: { $ref: '#/components/schemas/LinkInfo' }
+        summary: { $ref: '#/components/schemas/ReportSummary' }
+        recent_clicks: { type: array, items: { $ref: '#/components/schemas/ClickRow' } }
+
+    Criterion:
+      type: object
+      description: Điều kiện 1 tiêu chí — OR giữa các giá trị; exclude = NOT
+      required: [values]
+      properties:
+        values:
+          type: array
+          maxItems: 500
+          items: { type: string, maxLength: 256 }
+        exclude: { type: boolean, default: false }
+
+    ParamCondition:
+      type: object
+      required: [key, op]
+      properties:
+        key: { type: string, maxLength: 64 }
+        op: { type: string, enum: [eq, in, contains, exists, not_exists] }
+        values:
+          type: array
+          maxItems: 200
+          items: { type: string, maxLength: 256 }
+        exclude: { type: boolean, default: false }
+
+    ClickFilters:
+      type: object
+      description: Tiêu chí lọc click (§4.1a). AND giữa các tiêu chí, OR trong cùng tiêu chí.
+      properties:
+        links: { $ref: '#/components/schemas/Criterion' }
+        access_prefix: { $ref: '#/components/schemas/Criterion' }
+        api_version: { $ref: '#/components/schemas/Criterion' }
+        dest_host: { $ref: '#/components/schemas/Criterion' }
+        device: { $ref: '#/components/schemas/Criterion' }
+        os: { $ref: '#/components/schemas/Criterion' }
+        browser: { $ref: '#/components/schemas/Criterion' }
+        source_group: { $ref: '#/components/schemas/Criterion' }
+        referer_host: { $ref: '#/components/schemas/Criterion' }
+        country: { $ref: '#/components/schemas/Criterion' }
+        province: { $ref: '#/components/schemas/Criterion' }
+        ip: { $ref: '#/components/schemas/Criterion' }
+        weekdays:
+          type: array
+          description: 0 = Chủ nhật
+          items: { type: integer, minimum: 0, maximum: 6 }
+        hour_from: { type: integer, minimum: 0, maximum: 23 }
+        hour_to: { type: integer, minimum: 0, maximum: 23, description: 'Gồm cả giờ này; hour_from > hour_to = qua nửa đêm' }
+        is_custom: { type: boolean }
+        link_created_from: { type: string, format: date }
+        link_created_to: { type: string, format: date }
+        quality: { type: string, enum: [valid, bot, suspicious, all], default: all }
+        visit: { type: string, enum: [all, first, repeat], default: all }
+        campaign_presence: { type: string, enum: [any, with, without], default: any }
+        ctv_presence: { type: string, enum: [any, identified, unidentified], default: any }
+        params:
+          type: array
+          maxItems: 10
+          items: { $ref: '#/components/schemas/ParamCondition' }
+
+    ClickRow:
+      type: object
+      required: [ts, code, owner, device, os, browser, source_group, country, ip, is_bot, is_suspicious, is_repeat]
+      properties:
+        ts: { type: string, format: date-time }
+        code: { type: string }
+        prefix: { type: string }
+        access_prefix: { type: string }
+        long_url: { type: string }
+        owner: { type: string }
+        campaign_code: { type: string }
+        ctv_ref: { type: string }
+        ctv_display: { type: string }
+        device: { type: string }
+        os: { type: string }
+        browser: { type: string }
+        source_group: { type: string }
+        referer_host: { type: string }
+        country: { type: string }
+        province: { type: string }
+        ip: { type: string, description: 'Che với vai trò khác admin' }
+        is_bot: { type: boolean }
+        is_suspicious: { type: boolean }
+        is_repeat: { type: boolean }
+
+    ClickPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ClickRow' } }
+        next_cursor: { type: string, description: 'Rỗng = hết dữ liệu' }
+
+    ExplorerQuery:
+      type: object
+      required: [from, to, group_by]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        account: { type: array, maxItems: 100, items: { type: string, maxLength: 64 } }
+        campaign: { type: array, maxItems: 100, items: { type: string, maxLength: 64 } }
+        ctv: { type: array, maxItems: 100, items: { type: string, maxLength: 200 } }
+        prefix: { type: array, maxItems: 10, items: { type: string, maxLength: 32 } }
+        filters: { $ref: '#/components/schemas/ClickFilters' }
+        group_by:
+          type: array
+          minItems: 1
+          maxItems: 3
+          description: |
+            Chiều nhóm: account, campaign, ctv, link, link_prefix, access_prefix, api_version, dest_host,
+            device, os, browser, source_group, referer_host, country, province, day, week, month, hour, weekday,
+            param.<key> (tham số URL đang theo dõi, không phải PII)
+          items: { type: string, maxLength: 80 }
+        compare: { type: boolean, default: false }
+        sort_by:
+          type: string
+          enum: [clicks, unique_clicks, bot_clicks, suspicious_clicks, active_links, clicks_per_link, key]
+          default: clicks
+        order: { $ref: '#/components/schemas/SortOrder' }
+        limit: { type: integer, minimum: 1, maximum: 1000, default: 100, description: 'Top N nhóm, phần còn lại gộp "khác"' }
+
+    ExplorerMetrics:
+      type: object
+      required: [clicks, unique_clicks, bot_clicks, suspicious_clicks, active_links, clicks_per_link]
+      properties:
+        clicks: { type: integer, format: int64 }
+        unique_clicks: { type: integer, format: int64 }
+        bot_clicks: { type: integer, format: int64 }
+        suspicious_clicks: { type: integer, format: int64 }
+        active_links: { type: integer, format: int64 }
+        clicks_per_link: { type: number, format: double }
+        first_click_at: { type: string, format: date-time }
+        last_click_at: { type: string, format: date-time }
+
+    ExplorerTotals:
+      type: object
+      required: [metrics, accounts, ctvs]
+      properties:
+        metrics: { $ref: '#/components/schemas/ExplorerMetrics' }
+        accounts: { type: integer, format: int64, description: 'Số tài khoản có click' }
+        ctvs: { type: integer, format: int64, description: 'Số CTV (đã định danh) có click' }
+
+    ExplorerKey:
+      type: object
+      required: [dim, value, label]
+      properties:
+        dim: { type: string }
+        value: { type: string, description: 'Giá trị dùng để lọc / drill-down (vd ctv_ref, mã link)' }
+        label: { type: string, description: 'Nhãn hiển thị (SĐT đã che…)' }
+
+    ExplorerRow:
+      type: object
+      required: [keys, metrics, share]
+      properties:
+        keys: { type: array, items: { $ref: '#/components/schemas/ExplorerKey' } }
+        metrics: { $ref: '#/components/schemas/ExplorerMetrics' }
+        share: { type: number, format: double, description: 'clicks / tổng clicks' }
+        previous_clicks: { type: integer, format: int64 }
+        change_clicks: { type: number, format: double, nullable: true }
+
+    ExplorerResult:
+      type: object
+      required: [source, period, group_by, totals, rows, truncated]
+      properties:
+        source: { type: string, enum: [stats, clicks], description: 'stats = số liệu tổng hợp (≤ 12 tháng); clicks = click thô (≤ 3 tháng)' }
+        period: { $ref: '#/components/schemas/Period' }
+        group_by: { type: array, items: { type: string } }
+        totals: { $ref: '#/components/schemas/ExplorerTotals' }
+        previous_totals: { $ref: '#/components/schemas/ExplorerTotals' }
+        rows: { type: array, items: { $ref: '#/components/schemas/ExplorerRow' } }
+        other: { $ref: '#/components/schemas/ExplorerRow' }
+        truncated: { type: boolean, description: 'true = có nhóm bị gộp vào "khác"' }
+        group_count: { type: integer }
+
+    FacetItem:
+      type: object
+      required: [value, label, clicks]
+      properties:
+        value: { type: string }
+        label: { type: string }
+        clicks: { type: integer, format: int64 }
+
+    FacetList:
+      type: object
+      required: [field, items]
+      properties:
+        field: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/FacetItem' } }
+
+    ParamSummary:
+      type: object
+      required: [key, label, status, values, links, clicks]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        status: { type: string, enum: [active, high_cardinality, disabled] }
+        values: { type: integer, format: int64, description: 'Số giá trị khác nhau có click trong kỳ' }
+        links: { type: integer, format: int64, description: 'Số link mang tham số (trong phạm vi)' }
+        clicks: { type: integer, format: int64 }
+        tracked_since: { type: string, format: date, description: 'Số liệu chỉ có từ ngày này (backfill)' }
+
+    ParamSummaryList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ParamSummary' } }
+
+    ParamValueRow:
+      type: object
+      required: [value, metrics, links, accounts, campaigns, share]
+      properties:
+        value: { type: string }
+        metrics: { $ref: '#/components/schemas/Metrics' }
+        links: { type: integer, format: int64, description: 'Số link có click mang giá trị này' }
+        accounts: { type: integer, format: int64 }
+        campaigns: { type: integer, format: int64 }
+        share: { type: number, format: double }
+        change_clicks: { type: number, format: double, nullable: true }
+
+    ParamReport:
+      type: object
+      required: [param, rows, total, page, page_size, top_series, warnings]
+      properties:
+        param: { $ref: '#/components/schemas/ParamSummary' }
+        rows: { type: array, items: { $ref: '#/components/schemas/ParamValueRow' } }
+        total: { type: integer }
+        page: { type: integer }
+        page_size: { type: integer }
+        top_series:
+          type: array
+          description: Timeline top 5 giá trị
+          items:
+            type: object
+            required: [value, points]
+            properties:
+              value: { type: string }
+              points: { type: array, items: { $ref: '#/components/schemas/SeriesPoint' } }
+        warnings: { type: array, items: { $ref: '#/components/schemas/Alert' } }
+
+    SavedReportInput:
+      type: object
+      required: [name, kind, query]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, maxLength: 1000 }
+        kind: { type: string, enum: [explorer, clicks] }
+        query:
+          type: object
+          additionalProperties: true
+          description: Trạng thái màn hình (bộ lọc, group_by, biểu đồ…) — chạy lại theo phạm vi của người mở
+
+    SavedReport:
+      type: object
+      required: [id, name, kind, query, owner, created_at, updated_at, is_mine]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        kind: { type: string, enum: [explorer, clicks] }
+        query: { type: object, additionalProperties: true }
+        owner: { type: string }
+        is_mine: { type: boolean }
+        share_token: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    SavedReportList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/SavedReport' } }

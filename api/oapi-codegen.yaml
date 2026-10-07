@@ -1,0 +1,10 @@
+# go tool oapi-codegen -config oapi-codegen.yaml ../openapi/portal-api.yaml
+package: gen
+output: internal/httpapi/gen/gen.go
+generate:
+  models: true
+  chi-server: true
+  strict-server: true
+  embedded-spec: true
+output-options:
+  skip-prune: true

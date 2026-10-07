@@ -1,0 +1,7 @@
+replicaCount: 3
+host: portal.example.vn
+env:
+  APP_ENV: production
+  PORTAL_PUBLIC_ORIGIN: https://portal.example.vn
+  OTEL_SAMPLER: ratio
+  OTEL_SAMPLER_RATIO: "0.05"

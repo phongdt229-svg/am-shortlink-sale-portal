@@ -1,0 +1,5 @@
+env:
+  REDIS_ADDR: am-shortlink-portal-redis-staging:6379
+  APP_ENV: staging
+  KAFKA_LOG_TOPIC: stag-am-shortlink-portal-logs
+  OTEL_SAMPLER: always

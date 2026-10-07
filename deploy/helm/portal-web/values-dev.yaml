@@ -1,0 +1,5 @@
+replicaCount: 1
+host: portal-dev.example.vn
+env:
+  APP_ENV: dev
+  PORTAL_PUBLIC_ORIGIN: https://portal-dev.example.vn

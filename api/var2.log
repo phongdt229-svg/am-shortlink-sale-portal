@@ -1,0 +1,14 @@
+{"time":"2026-10-07T14:38:20.6774641+07:00","level":"INFO","msg":"starting portal-api","service":"am-shortlink-portal-api","env":"local","version":"dev","secrets_loaded":["MONGODB_URI","PORTAL_JWT_SIGNING_KEY","PII_HASH_SALT"]}
+{"time":"2026-10-07T14:38:22.6912689+07:00","level":"INFO","msg":"report cache enabled","service":"am-shortlink-portal-api","env":"local","ttl":60000000000,"ttl_past":900000000000}
+{"time":"2026-10-07T14:38:22.6977291+07:00","level":"INFO","msg":"listening","service":"am-shortlink-portal-api","env":"local","addr":":8099"}
+{"time":"2026-10-07T14:38:23.1066648+07:00","level":"WARN","msg":"rate limit redis failed, fallback in-memory","service":"am-shortlink-portal-api","env":"local","err":"context deadline exceeded"}
+{"time":"2026-10-07T14:38:23.167058+07:00","level":"INFO","msg":"http","service":"am-shortlink-portal-api","env":"local","method":"POST","path":"/v1/auth/login","status":200,"bytes":586,"duration_ms":211,"request_id":"DESKTOP-3P40N4D/JoTnqaduns-000001","user":"","client_ip":"::x::"}
+{"time":"2026-10-07T14:38:23.3789569+07:00","level":"WARN","msg":"cache get failed","service":"am-shortlink-portal-api","env":"local","err":"context deadline exceeded"}
+redis: 2026/10/07 14:38:23 pool.go:770: redis: connection pool: failed to dial after 5 attempts: dial tcp 10.255.255.1:6379: i/o timeout
+redis: 2026/10/07 14:38:23 pool.go:770: redis: connection pool: failed to dial after 5 attempts: dial tcp 10.255.255.1:6379: i/o timeout
+redis: 2026/10/07 14:38:23 pool.go:770: redis: connection pool: failed to dial after 5 attempts: dial tcp 10.255.255.1:6379: i/o timeout
+{"time":"2026-10-07T14:38:23.638645+07:00","level":"WARN","msg":"cache set failed","service":"am-shortlink-portal-api","env":"local","err":"context deadline exceeded"}
+{"time":"2026-10-07T14:38:23.638645+07:00","level":"INFO","msg":"http","service":"am-shortlink-portal-api","env":"local","method":"GET","path":"/v1/reports/campaigns","status":200,"bytes":3540,"duration_ms":410,"request_id":"DESKTOP-3P40N4D/JoTnqaduns-000002","user":"admin","client_ip":"::x::"}
+{"time":"2026-10-07T14:38:23.8573853+07:00","level":"WARN","msg":"cache get failed","service":"am-shortlink-portal-api","env":"local","err":"context deadline exceeded"}
+{"time":"2026-10-07T14:38:24.0336215+07:00","level":"WARN","msg":"cache set failed","service":"am-shortlink-portal-api","env":"local","err":"context deadline exceeded"}
+{"time":"2026-10-07T14:38:24.0336215+07:00","level":"INFO","msg":"http","service":"am-shortlink-portal-api","env":"local","method":"GET","path":"/v1/reports/campaigns","status":200,"bytes":3540,"duration_ms":327,"request_id":"DESKTOP-3P40N4D/JoTnqaduns-000003","user":"admin","client_ip":"::x::"}

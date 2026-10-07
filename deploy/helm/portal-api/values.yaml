@@ -1,0 +1,38 @@
+image:
+  repository: harbor.example/am-shortlink/portal-api # TODO: đường dẫn Harbor thật
+  tag: latest
+  pullPolicy: IfNotPresent
+replicaCount: 2
+env:
+  APP_ENV: dev
+  LOG_LEVEL: info
+  MONGODB_DB_CORE: am_shortlink
+  MONGODB_DB_REPORT: am_shortlink_report
+  MONGODB_READ_PREFERENCE: secondaryPreferred
+  MONGODB_MAX_TIME: 10s
+  EXPORT_DIR: /data/exports
+  # Redis RIÊNG của Portal (cache báo cáo + rate limit). Tên host xin cấp theo mẫu am-shortlink-redis-cache-* (E3).
+  REDIS_ADDR: am-shortlink-portal-redis-dev:6379
+  REDIS_DB: "0"
+  REPORT_CACHE_TTL: 60s
+  REPORT_CACHE_TTL_PAST: 15m
+  OTEL_ENABLED: "true"
+  OTEL_SERVICE_NAMESPACE: am-shortlink
+  OTEL_SERVICE_NAME: am-shortlink-portal-api
+  OTEL_ENDPOINT_TRACES: http://otel-collector.fpt.net/v1/traces
+  OTEL_SAMPLER: always
+  KAFKA_LOG_BROKERS: ""
+  KAFKA_LOG_TOPIC: dev-am-shortlink-portal-logs
+# Secret do Vault inject thành file (E12): portal-api đọc <TÊN>_FILE.
+secretFiles:
+  MONGODB_URI_FILE: /vault/secrets/mongodb-uri
+  PORTAL_JWT_SIGNING_KEY_FILE: /vault/secrets/jwt-signing-key
+  PII_HASH_SALT_FILE: /vault/secrets/pii-hash-salt
+  REDIS_PASSWORD_FILE: /vault/secrets/redis-password
+podAnnotations: {} # vd annotation Vault Agent Injector theo template ISC
+resources:
+  requests: { cpu: 100m, memory: 128Mi }
+  limits: { cpu: "1", memory: 512Mi }
+exports:
+  storageClass: ""
+  size: 10Gi

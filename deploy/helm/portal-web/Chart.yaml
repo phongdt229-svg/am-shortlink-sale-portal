@@ -1,0 +1,6 @@
+apiVersion: v2
+name: portal-web
+description: Frontend Next.js của Portal báo cáo shortlink
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

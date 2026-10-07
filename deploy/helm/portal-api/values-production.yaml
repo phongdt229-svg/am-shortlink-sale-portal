@@ -1,0 +1,7 @@
+replicaCount: 3
+env:
+  REDIS_ADDR: am-shortlink-portal-redis:6379
+  APP_ENV: production
+  KAFKA_LOG_TOPIC: am-shortlink-portal-logs
+  OTEL_SAMPLER: ratio
+  OTEL_SAMPLER_RATIO: "0.05"

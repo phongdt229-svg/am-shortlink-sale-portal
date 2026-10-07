@@ -1,0 +1,4 @@
+host: portal-stag.example.vn
+env:
+  APP_ENV: staging
+  PORTAL_PUBLIC_ORIGIN: https://portal-stag.example.vn

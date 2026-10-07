@@ -1,0 +1,13 @@
+time=2026-10-07T14:27:36.233+07:00 level=INFO msg=dropping core=am_shortlink report=am_shortlink_report
+time=2026-10-07T14:27:37.087+07:00 level=INFO msg=generated links=3000 clicks=163212 from=2026-06-10 to=2026-10-07 took=831ms
+time=2026-10-07T14:28:35.931+07:00 level=INFO msg="migration applied" version=1 description="Collection + index của Portal trong am_shortlink_report"
+time=2026-10-07T14:28:35.932+07:00 level=INFO msg="seed done" users=7 links=3000 clicks=163212 stats_docs=185033 took=59.671s
+
+Tài khoản dev:
+  admin      / admin123    role=admin  portal_access=true  active=true
+  viewer     / viewer123   role=viewer portal_access=true  active=true
+  partner_a  / partner123  role=user   portal_access=true  active=true
+  partner_b  / partner123  role=user   portal_access=true  active=true
+  partner_c  / partner123  role=user   portal_access=true  active=true
+  partner_d  / partner123  role=user   portal_access=false active=true
+  api_bot    / partner123  role=user   portal_access=false active=false
