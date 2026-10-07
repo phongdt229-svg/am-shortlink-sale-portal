@@ -1,6 +1,24 @@
 # CI Portal: 2 image độc lập, job chạy theo thư mục thay đổi.
 # Khi tích hợp template gitflow ISC: include `isc/cicd-config/ci-template/gitflow` và giữ các job lint/test dưới đây.
-stages: [lint, test, build]
+stages: [lint, test, build, e2e]
+
+# E2E theo vai trò trên stack docker compose (MongoDB seed + Redis + portal-api + portal-web).
+e2e:
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.63.0-noble
+  services: [docker:27-dind]
+  variables: { DOCKER_HOST: "tcp://docker:2375", E2E_BASE_URL: "http://docker:3000" }
+  rules:
+    - changes: [api/**/*, web/**/*, openapi/**/*]
+  script:
+    - apt-get update -qq && apt-get install -y -qq docker.io docker-compose-v2 >/dev/null
+    - docker compose -f deploy/docker-compose.yml up -d --build mongo redis migrate portal-api portal-web
+    - docker compose -f deploy/docker-compose.yml run --rm seed
+    - corepack enable && cd web && pnpm install --frozen-lockfile && pnpm test:e2e
+  artifacts:
+    when: on_failure
+    paths: [web/test-results/]
+    reports: { junit: web/e2e-results.xml }
 
 .api-rules: &api-rules
   rules:

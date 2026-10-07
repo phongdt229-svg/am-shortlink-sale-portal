@@ -1,7 +1,9 @@
 # Môi trường local đầy đủ: MongoDB (replica set 1 node), Redis (cache), portal-api, portal-web, OTel Collector, Jaeger.
 #   docker compose -f deploy/docker-compose.yml up -d --build
 #   docker compose -f deploy/docker-compose.yml run --rm seed      # sinh dữ liệu giả lập (lần đầu)
-# Portal: http://localhost:3000 · API: http://localhost:8080 · Jaeger: http://localhost:16686
+# Portal: http://localhost:3000 · API: http://localhost:8080 · Jaeger: http://localhost:16686 · mongo-express: http://localhost:8081
+# Chỉ hạ tầng (chạy api/web bằng go run / pnpm dev):  docker compose -f deploy/docker-compose.yml up -d mongo redis mongo-express
+#   → MONGODB_URI=mongodb://localhost:27018/?directConnection=true · REDIS_ADDR=localhost:6380
 name: am-shortlink-portal
 
 x-api-env: &api-env
@@ -26,6 +28,15 @@ services:
       test: mongosh --quiet --eval "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok }"
       interval: 5s
       retries: 30
+
+  # Xem dữ liệu MongoDB trên trình duyệt: http://localhost:8081 (chỉ local).
+  mongo-express:
+    image: mongo-express:1.0.2
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/?directConnection=true
+      ME_CONFIG_BASICAUTH: "false"
+    ports: ["8081:8081"]
+    depends_on: { mongo: { condition: service_healthy } }
 
   redis:
     image: redis:7-alpine

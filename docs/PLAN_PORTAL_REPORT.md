@@ -87,7 +87,7 @@ Nguyên tắc:
 | Form / lọc | React Hook Form + Zod; `nuqs` đồng bộ bộ lọc ↔ URL |
 | Ngày giờ | `date-fns` + `date-fns-tz` (Asia/Ho_Chi_Minh) |
 | Phiên (frontend) | Cookie httpOnly mã hoá (JWE) do BFF quản lý; đăng nhập qua `portal-api` (P-D1) |
-| **Backend** (`api/`) | Go 1.23+, `chi`, **`mongo-go-driver v2`**, `slog`, `golang-jwt/jwt v5`, `golang.org/x/crypto/bcrypt`, `go-playground/validator`, `envconfig`, `oapi-codegen` (sinh interface handler từ OpenAPI) |
+| **Backend** (`api/`) | Go 1.26, `chi`, **`mongo-go-driver v2`**, `go-redis v9`, `slog`, `golang-jwt/jwt v5`, `golang.org/x/crypto/bcrypt`, `envconfig`, `oapi-codegen` (strict server + validator kin-openapi từ OpenAPI), `excelize` (XLSX) |
 | Cache | **Redis riêng của Portal** (`go-redis v9`): cache kết quả báo cáo + rate limit đăng nhập dùng chung giữa replica (§3.2) |
 | DB | MongoDB (cùng cụm với Service) — đọc ưu tiên **secondary / node analytics** (`readPreference=secondaryPreferred`), `maxTimeMS` cho mọi truy vấn |
 | File export | Object storage nội bộ (S3-compatible) hoặc GridFS trong `am_shortlink_report`, TTL 7 ngày |
@@ -101,7 +101,7 @@ Monorepo `am-shortlink-portal` gồm 2 ứng dụng build / deploy độc lập 
 
 ```
 am-shortlink-portal/
-├── api/                                        # BACKEND — Go 1.23+ (portal-api)
+├── api/                                        # BACKEND — Go 1.26 (portal-api)
 │   ├── cmd/
 │   │   ├── portal-api/main.go                  # HTTP server + worker export (cờ --worker để chạy tách)
 │   │   ├── migrate/main.go                     # tạo collection + index của Portal (K8s Job trước deploy, idempotent)
@@ -178,7 +178,7 @@ am-shortlink-portal/
 │   ├── package.json  tsconfig.json  eslint.config.mjs
 │   └── Dockerfile                              # Next standalone, non-root
 ├── openapi/
-│   └── portal-api.yaml                         # OpenAPI 3.1 — NGUỒN SỰ THẬT: sinh api/internal/httpapi/gen và web/src/lib/api
+│   └── portal-api.yaml                         # OpenAPI 3.0.3 — NGUỒN SỰ THẬT: sinh api/internal/httpapi/gen và web/src/lib/api
 ├── deploy/
 │   ├── helm/portal-api/  helm/portal-web/      # values-{dev,staging,production}.yaml
 │   └── docker-compose.yml                      # local: MongoDB (replica set 1 node), portal-api, portal-web, OTel Collector, Jaeger

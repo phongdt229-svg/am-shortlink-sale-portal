@@ -185,12 +185,16 @@ func TestCTVRankingLookupAndDetail(t *testing.T) {
 	// User khác phạm vi: CTV của partner_a không hiện với partner_b.
 	pb := domain.Principal{Username: "partner_b", Role: domain.RoleUser}
 	var onlyA string
+	// Owner thực tế của CTV lấy từ link (danh mục ctvs chỉ ghi owner đầu tiên của CTV dùng chung).
 	owners := map[string]map[string]bool{}
-	for _, c := range env.Dataset.CTVs {
-		if owners[c.ID] == nil {
-			owners[c.ID] = map[string]bool{}
+	for _, l := range env.Dataset.Links {
+		if l.CTV == "" {
+			continue
 		}
-		owners[c.ID][c.Owner] = true
+		if owners[l.CTV] == nil {
+			owners[l.CTV] = map[string]bool{}
+		}
+		owners[l.CTV][l.Owner] = true
 	}
 	for idv, os := range owners {
 		if len(os) == 1 && os["partner_a"] {
@@ -198,6 +202,7 @@ func TestCTVRankingLookupAndDetail(t *testing.T) {
 			break
 		}
 	}
+	require.NotEmpty(t, onlyA)
 	qb, _ := svc.Build(pb, report.Params{From: day("2026-09-01"), To: day("2026-10-07")})
 	_, err = svc.CTV(ctx, qb, m.CTVRef(onlyA))
 	require.Error(t, err)

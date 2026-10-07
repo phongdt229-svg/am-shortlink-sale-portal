@@ -4,6 +4,23 @@ $ next start -p 3000
    - Network:      http://172.18.16.207:3000
 
  ✓ Starting...
- ✓ Ready in 1455ms
-{"level":"info","time":"2026-10-07T09:01:25.965Z","service":"am-shortlink-portal-web","env":"local","user":"admin","role":"admin","msg":"login"}
-{"level":"info","time":"2026-10-07T09:02:52.199Z","service":"am-shortlink-portal-web","env":"local","user":"admin","role":"admin","msg":"login"}
+ ✓ Ready in 584ms
+{"level":"info","time":"2026-10-07T09:36:06.963Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:08.691Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:10.054Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:11.937Z","service":"am-shortlink-portal-web","env":"local","user":"admin","role":"admin","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:15.380Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+ ⨯ Error [ApiError]: tài khoản nằm ngoài phạm vi được xem
+    at d.from (C:\xampp\htdocs\am-shortlink-sale-portal\web\.next\server\app\(portal)\campaigns\[code]\page.js:1:9740)
+    at e (C:\xampp\htdocs\am-shortlink-sale-portal\web\.next\server\app\(portal)\campaigns\[code]\page.js:1:9925)
+    at k (C:\xampp\htdocs\am-shortlink-sale-portal\web\.next\server\app\(portal)\campaigns\[code]\page.js:1:13670)
+    at p (C:\xampp\htdocs\am-shortlink-sale-portal\web\.next\server\app\(portal)\accounts\[username]\page.js:2:9091) {
+  status: 403,
+  code: 'forbidden_scope',
+  requestId: 'DESKTOP-3P40N4D/1NjFh6MI88-000038',
+  fields: undefined,
+  digest: '55874122'
+}
+{"level":"info","time":"2026-10-07T09:36:17.184Z","service":"am-shortlink-portal-web","env":"local","user":"partner_a","role":"user","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:19.604Z","service":"am-shortlink-portal-web","env":"local","user":"viewer","role":"viewer","msg":"login"}
+{"level":"info","time":"2026-10-07T09:36:20.980Z","service":"am-shortlink-portal-web","env":"local","user":"viewer","role":"viewer","msg":"login"}

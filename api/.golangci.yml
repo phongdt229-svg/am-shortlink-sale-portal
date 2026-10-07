@@ -1,0 +1,24 @@
+version: "2"
+run:
+  build-tags: [integration]
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errorlint
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - sqlclosecheck
+    - unconvert
+  settings:
+    gosec:
+      excludes:
+        - G104 # lỗi bỏ qua có chủ đích (best-effort: audit, cache)
+  exclusions:
+    paths:
+      - internal/httpapi/gen
+formatters:
+  enable: [gofmt, goimports]
